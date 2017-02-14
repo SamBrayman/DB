@@ -10,10 +10,10 @@
 
 -- Student SQL code here:
 
-select customer.custkey, customer.name, avg(DATE(lineitem.receiptdate) - DATE(lineitem.shipdate))
-from customer
-inner join orders on customer.custkey = orders.custkey
-inner join lineitem on orders.orderkey = lineitem.orderkey
-group by orders.custkey
-order by avg(DATE(lineitem.receiptdate) - DATE(lineitem.shipdate)) desc
-limit 10;
+SELECT customer.custkey, customer.name, AVG(DATE(lineitem.receiptdate) - DATE(lineitem.shipdate))
+FROM customer
+INNER JOIN orders ON customer.custkey = orders.custkey
+INNER JOIN lineitem ON orders.orderkey = lineitem.orderkey
+GROUP BY orders.custkey
+ORDER BY AVG(DATE(lineitem.receiptdate) - DATE(lineitem.shipdate)) DESC
+LIMIT 10;
