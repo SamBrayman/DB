@@ -213,7 +213,9 @@ class PageHeader:
   #Check that tupleIndex falls within writable regions of current Page
   def validTupleId(self, tupleId):
     tupleIndex = tupleId.tupleIndex
-    return (tupleIndex <= (self.freeSpaceOffset - self.tupleSize)) and (tupleIndex >= self.headerSize())
+    if tupleIndex < self.headerSize():
+      tupleId.tupleIndex += self.headerSize()
+    return (tupleIndex <= (self.freeSpaceOffset - self.tupleSize)) and (tupleIndex >= self.headerSize()) and (tupleIndex % self.tupleSize == 0)
 
   #Check that the tupleData size matches the page tuple size
   def validTupleData(self, tupleData):
@@ -318,12 +320,13 @@ class Page(BytesIO):
   >>> p.header.numTuples()
   11
 
+
   # Test iterator
   >>> [schema.unpack(tup).age for tup in p]
   [28, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38]
 
   # Test clearing of first tuple
-  >>> tId = TupleId(p.pageId, 0)
+  >>> tId = TupleId(p.pageId, 0 + p.header.headerSize())
   >>> sizeBeforeClear = p.header.usedSpace()
 
   >>> p.clearTuple(tId)
@@ -345,9 +348,25 @@ class Page(BytesIO):
   >>> [schema.unpack(tup).age for tup in p]
   [20, 22, 24, 26, 28, 30, 32, 34, 36, 38]
 
+
   # Check that the page's data segment has been compacted after the remove.
   >>> p.header.usedSpace() == (sizeBeforeRemove - p.header.tupleSize)
   True
+
+  # More delete tests
+  >>> tId = TupleId(p.pageId, p.header.headerSize() + p.header.tupleSize * 4)
+  >>> p.deleteTuple(tId)
+
+  >>> [schema.unpack(tup).age for tup in p]
+  [20, 22, 24, 26, 30, 32, 34, 36, 38]
+
+  >>> p.clearTuple(tId)
+
+  >>> schema.unpack(p.getTuple(tId))
+  employee(id=0, age=0)
+
+  >>> [schema.unpack(tup).age for tup in p]
+  [20, 22, 24, 26, 0, 32, 34, 36, 38]
 
   """
 
@@ -394,13 +413,13 @@ class Page(BytesIO):
 
   # Iterator
   def __iter__(self):
-    self.iterTupleIdx = 0
+    self.iterTupleIdx = 0 + self.header.headerSize()
     return self
 
   def __next__(self):
     t = self.getTuple(TupleId(self.pageId, self.iterTupleIdx))
     if t:
-      self.iterTupleIdx += 1
+      self.iterTupleIdx += self.header.tupleSize
       return t
     else:
       raise StopIteration
@@ -421,8 +440,8 @@ class Page(BytesIO):
       (start, end) = self.header.getTupleRangeFromId(tupleId)
       if start and end:
         return self.getbuffer()[start:end]
-      else:
-        raise ValueError("Tuple index is out of bounds of current page.")
+      #else:
+        #raise ValueError("Tuple index is out of bounds of current page.")
       #return None
 
   #???? what is someone tries to put tuple at index that breaks
@@ -449,6 +468,8 @@ class Page(BytesIO):
       if tupleIndex and start and end:
         self.getbuffer()[start:end] = tupleData
         self.setDirty(True)
+
+        index = 0
         return TupleId(self.pageId, tupleIndex)
       else:
         #no free tuple space
@@ -457,15 +478,32 @@ class Page(BytesIO):
 
   # Zeroes out the contents of the tuple at the given tuple id.
   def clearTuple(self, tupleId):
-    raise NotImplementedError
-    if self.header and tupleId:
+    #raise NotImplementedError
+    '''if self.header and tupleId:
       (start, end) = self.header.getTupleRangeFromId(tupleId)
       if start and end:
         zeroedOutValue = self.header.tupleSize * b'\x00'
         self.getbuffer()[start:end] = zeroedOutValue
         self.setDirty(True)
       else:
+        raise ValueError("Not a valid tupleId.")'''
+    if self.header and tupleId:
+      start = tupleId.tupleIndex
+      #
+      #REMEMBER TO DO THIS SHIT BELOW!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      #REMEMBER TO DO THIS SHIT BELOW!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      #REMEMBER TO DO THIS SHIT BELOW!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      #REMEMBER TO DO THIS SHIT BELOW!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      #REMEMBER TO DO THIS SHIT BELOW!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      #
+      #if (start < self.header.headerSize()):
+        #start += self.header.headerSize()
+      if (start < self.header.headerSize()) or (start > self.header.freeSpaceOffset) or (start % self.header.tupleSize != 0):
         raise ValueError("Not a valid tupleId.")
+      else:
+        zeroedOutValue = self.header.tupleSize * b'\x00'
+        self.getbuffer()[start:start + self.header.tupleSize] = zeroedOutValue
+        self.setDirty(True)
 
 
   # Removes the tuple at the given tuple id, shifting subsequent tuples.
@@ -473,7 +511,7 @@ class Page(BytesIO):
     if self.header and tupleId:
       (start, end) = self.header.getTupleRangeFromId(tupleId)
       if start and end:
-        for index in range(end, self.header.freeSpaceOffset - self.header.tupleSize, self.header.tupleSize):
+        for index in range(end, self.header.freeSpaceOffset + self.header.tupleSize, self.header.tupleSize):
           self.getbuffer()[(index - self.header.tupleSize):index] = self.getvalue()[index : index + self.header.tupleSize]
 
         self.header.freeSpaceOffset -= self.header.tupleSize;
@@ -500,7 +538,7 @@ class Page(BytesIO):
   @classmethod
   def unpack(cls, pageId, buffer):
     #need to recreate, unpack header and buffer (page)
-    header = cls.headerClass.unpack(buffer)
+    header = cls.headerClass.unpack(BytesIO(buffer).getbuffer())
     return cls(buffer=buffer, pageId=pageId, header=header)
 
 
@@ -508,3 +546,5 @@ class Page(BytesIO):
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
+
+    
