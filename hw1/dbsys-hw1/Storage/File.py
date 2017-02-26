@@ -242,46 +242,52 @@ class StorageFile:
     pageSize       = kwargs.get("pageSize", io.DEFAULT_BUFFER_SIZE)
     pageClass      = kwargs.get("pageClass", StorageFile.defaultPageClass)
     schema         = kwargs.get("schema", None)
-    mode           = kwargs.get("mode", None)
-
-    self.fileId    = kwargs.get("fileId", None)
+    if schema and pageSize and pageClass:
+        self.pageSize  = pageSize
+        self.pageClass = pageClass
+        self.schema    = schema
+    self.mode           = kwargs.get("mode", None)
+    self.header = FileHeader(pageSize=self.pageSize,pageClass=self.pageClass,schema=self.schema)
+    self.file = None
+    self.fileId    = kwargs.get("fileId", 0)
     self.filePath  = kwargs.get("filePath", None)
-
     ######################################################################################
     # DESIGN QUESTION: how do you initialize these?
     # The file should be opened depending on the desired mode of operation.
     # The file header may come from the file contents (i.e., if the file already exists),
     # otherwise it should be created from scratch.
-    if(self.fileId and self.filePath):
-        if(mode == 'create'):
+
+    if(schema==None or self.mode==None or pageClass==None or pageSize==None):
+        if(self.mode == 'create'):
             try:
+                self.header = FileHeader(pageSize=pageSize,pageClass=pageClass,schema=schema)
                 self.file = open(self.filePath,'wb+')
+                self.file.flush()
             except:
                 raise ValueError("The file path given was invalid.")
-        else:
+        elif(self.mode == 'update' or self.mode == 'truncate'):
             try:
                 self.file = open(self.filePath,'r+b')
             except:
                 raise ValueError("The file path given was invalid.")
-    else:
-        raise ValueError("The file path and/or file Id  were not given.")
-    if(mode == 'create'):
-        self.header    = FileHeader(kwargs)
-    elif(mode == 'truncate' or mode == 'update'):
-        if(self.size() != 0):
-            #self.
-            self.header = FileHeader.fromFile(self.file)
         else:
-            self.header = FileHeader(pageSize=pageSize,pageClass=pageClass,schema=schema)
+            raise ValueError("No mode was given.")
     else:
-        raise ValueError("Invalid mode.")
+        self.header = FileHeader(pageSize=pageSize,pageClass = pageClass,schema=schema)
+        if(self.mode == 'create'):
+            self.file = open(self.filePath,'w+b')
+        else:
+            self.file = open(self.filePath,'r+b')
+
+    
 
     ######################################################################################
     # DESIGN QUESTION: what data structure do you use to keep track of the free pages?
     self.freePages = Queue()
-    for page in self.pages():
-        if(page.hasFreeTuple()):
-            self.freePages.put(page.pageId)
+    if(self.numPages != 0):
+        for page in self.pages():
+            if(page.hasFreeTuple()):
+                self.freePages.put(page.pageId)
     #Fill queue
     #raise NotImplementedError
 
@@ -298,8 +304,8 @@ class StorageFile:
   def pageId(self, pageIndex):
     return PageId(self.fileId, pageIndex)
 
-  def schema(self):
-    return self.header.schema
+ # def schema(self):
+ #   return self.header.schema
 
   def pageSize(self):
     return self.header.pageSize
@@ -311,7 +317,10 @@ class StorageFile:
     return os.path.getsize(self.filePath)
 
   def headerSize(self):
-      return self.header.size
+      if(self.header):
+        return self.header.size
+      else:
+        return 0
     #raise NotImplementedError
 
   def numPages(self):
@@ -375,21 +384,20 @@ class StorageFile:
     #self.file.close()
   # Adds a new page to the file by writing past its end.
   def allocatePage(self):
-      pageIndex = self.numPages() - 1
-      pageId = self.PageId(pageIndex)
-      Page(pageId = pageId,schema = schema)
+      pageIndex = self.numPages()
+      pageId = PageId(self.fileId,pageIndex)
+      Page(pageId = pageId,schema = self.schema,buffer = self.bufferPool.pool.getbuffer())
       self.writePage(page)
     #raise NotImplementedError
 
   # Returns the page id of the first page with available space.
   def availablePage(self):
-    returned = False
-    for page in self.pages():
-        if(page.header.hasFreeTuple()):
-            returned = True
-            return page.pageId
-    if(~returned):
-        raise ValueError("There are no free pages.")
+    if(self.freePages.qsize() != 0):
+        for page in self.pages():
+            if(page.header.hasFreeTuple()):
+                return page.pageId
+    else:
+        self.allocatePage()
     #raise NotImplementedError
 
 
