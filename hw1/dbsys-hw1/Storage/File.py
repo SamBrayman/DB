@@ -239,47 +239,42 @@ class StorageFile:
     if self.bufferPool is None:
       raise ValueError("No buffer pool found when initializing a storage file")
 
-    pageSize       = kwargs.get("pageSize", io.DEFAULT_BUFFER_SIZE)
-    pageClass      = kwargs.get("pageClass", StorageFile.defaultPageClass)
-    schema         = kwargs.get("schema", None)
-    if schema and pageSize and pageClass:
-        self.pageSize  = pageSize
-        self.pageClass = pageClass
-        self.schema    = schema
-    self.mode           = kwargs.get("mode", None)
-    self.header = FileHeader(pageSize=self.pageSize,pageClass=self.pageClass,schema=self.schema)
-    self.file = None
-    self.fileId    = kwargs.get("fileId", 0)
+    pageSize = kwargs.get("pageSize", io.DEFAULT_BUFFER_SIZE)
+    pageClass = kwargs.get("pageClass", StorageFile.defaultPageClass)
+    schema = kwargs.get("schema", None)
+    #if(schema and pageSize and pageClass):
+    #    self.pageSize  = pageSize
+    #    self.pageClass = pageClass
+    #    self.schema = schema
+    self.mode = kwargs.get("mode", None)
+    #self.header = FileHeader(pageSize=self.pageSize,pageClass=self.pageClass,schema=schema)
+    #self.file = None
+    #self.header = None
+    #self.file = None
+    self.fileId    = kwargs.get("fileId", None)
     self.filePath  = kwargs.get("filePath", None)
+    if(self.fileId is None or self.filePath is None):
+        raise ValueError("Invalid input arguments.")
     ######################################################################################
     # DESIGN QUESTION: how do you initialize these?
     # The file should be opened depending on the desired mode of operation.
     # The file header may come from the file contents (i.e., if the file already exists),
     # otherwise it should be created from scratch.
-
-    if(schema==None or self.mode==None or pageClass==None or pageSize==None):
-        if(self.mode == 'create'):
-            try:
-                self.header = FileHeader(pageSize=pageSize,pageClass=pageClass,schema=schema)
-                self.file = open(self.filePath,'wb+')
-                self.file.flush()
-            except:
-                raise ValueError("The file path given was invalid.")
-        elif(self.mode == 'update' or self.mode == 'truncate'):
-            try:
-                self.file = open(self.filePath,'r+b')
-            except:
-                raise ValueError("The file path given was invalid.")
-        else:
-            raise ValueError("No mode was given.")
-    else:
-        self.header = FileHeader(pageSize=pageSize,pageClass = pageClass,schema=schema)
-        if(self.mode == 'create'):
+     
+    if(self.mode == 'create'):
+            self.header = FileHeader(pageSize=pageSize,pageClass=pageClass,schema=schema)
             self.file = open(self.filePath,'w+b')
-        else:
+            self.file.flush()
+    elif(self.mode == 'update'):
             self.file = open(self.filePath,'r+b')
+            self.header = FileHeader.fromFile(self.file)
+    elif(self.mode == 'truncate'):
+            self.file = open(self.filePath,'w+b')
+            self.header = FileHeader.fromFile(self.file) 
+            self.file.flush()
+    else:
+            raise ValueError("No mode was given.")
 
-    
 
     ######################################################################################
     # DESIGN QUESTION: what data structure do you use to keep track of the free pages?
@@ -304,8 +299,8 @@ class StorageFile:
   def pageId(self, pageIndex):
     return PageId(self.fileId, pageIndex)
 
- # def schema(self):
- #   return self.header.schema
+  def schema(self):
+    return self.header.schema
 
   def pageSize(self):
     return self.header.pageSize
@@ -317,7 +312,7 @@ class StorageFile:
     return os.path.getsize(self.filePath)
 
   def headerSize(self):
-      if(self.header):
+      if(self.header is not None):
         return self.header.size
       else:
         return 0
@@ -369,7 +364,7 @@ class StorageFile:
     #self.file = open(self.filePath,'r+b')
     start = self.pageOffset(pageId)
     end = start + self.pageSize()
-    page = page.unpack(pageClass,pageId,self.file.read()[start:end])
+    page = SlottedPage.unpack(buffer = self.file.read()[start:end])
     #raise NotImplementedError
 
   def writePage(self, page):
@@ -378,6 +373,7 @@ class StorageFile:
         self.file.seek(page.pageId.pageIndex * self.pageSize() + page.header.headerSize())
         self.file.write(page.pack())
         self.file.seek(0)
+        self.file.flush()
     else:
         raise ValueError("The page is invalid.")
     #raise NotImplementedError
@@ -386,7 +382,7 @@ class StorageFile:
   def allocatePage(self):
       pageIndex = self.numPages()
       pageId = PageId(self.fileId,pageIndex)
-      Page(pageId = pageId,schema = self.schema,buffer = self.bufferPool.pool.getbuffer())
+      Page(pageId = pageId,schema = self.schema(),buffer = self.bufferPool.pool.getbuffer())
       self.writePage(page)
     #raise NotImplementedError
 
