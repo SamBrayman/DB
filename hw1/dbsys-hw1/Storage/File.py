@@ -164,8 +164,8 @@ class StorageFile:
   # Create a pair of pages.
   >>> pId  = PageId(fId, 0)
   >>> pId1 = PageId(fId, 1)
-  >>> p    = SlottedPage(pageId=pId,  buffer=bytes(f.pageSize()), schema=schema)
-  >>> p1   = SlottedPage(pageId=pId1, buffer=bytes(f.pageSize()), schema=schema)
+  >>> p    = Page(pageId=pId,  buffer=bytes(f.pageSize()), schema=schema)
+  >>> p1   = Page(pageId=pId1, buffer=bytes(f.pageSize()), schema=schema)
 
   # Populate pages
   >>> for tup in [schema.pack(schema.instantiate(i, 2*i+20)) for i in range(10)]:
@@ -178,15 +178,8 @@ class StorageFile:
 
   # Write out pages and sync to disk.
   >>> f.writePage(p)
-  >>> f.headerSize()
-
-
   >>> f.writePage(p1)
   >>> f.flush()
-
-  # Page Size
-  >>> f.size()
-  f.pageSize()
 
   # Check the number of pages, and the file size.
   >>> f.numPages() == 2
@@ -196,10 +189,11 @@ class StorageFile:
   True
 
   >>> pId2 = PageId(fId, 2)
-  >>> p2    = SlottedPage(pageId=pId,  buffer=bytes(f.pageSize()), schema=schema)
+  >>> p2    = Page(pageId=pId,  buffer=bytes(f.pageSize()), schema=schema)
   >>> for tup in [schema.pack(schema.instantiate(i, i+20)) for i in range(10, 20)]:
   ...    _ = p1.insertTuple(tup)
   ...
+  >>> f.writePage(p2)
   >>> f.numPages() == 2
   True
 
@@ -238,7 +232,7 @@ class StorageFile:
   """
 
   # Change this to the Page class if you want contiguous page storage in the file.
-  defaultPageClass = SlottedPage
+  defaultPageClass = Page
   # StorageFile constructor.
   #
   # REIMPLEMENT this as desired.
@@ -341,7 +335,7 @@ class StorageFile:
   # Notice this assumes the header is written before the first page,
   # and is not part of the first page itself.
   def pageOffset(self, pageId):
-    return self.headerSize() + self.pageSize() * pageId.pageIndex
+    return self.headerSize() + (self.pageSize() * pageId.pageIndex)
 
   # Returns whether the given page id is valid for this file.
   def validPageId(self, pageId):
@@ -353,11 +347,13 @@ class StorageFile:
   # Reads a page header from disk.
   def readPageHeader(self, pageId):
     #self.file = open(self.filePath,'r+b')
-    if(validPageId() and self.header):
-        p = Page(schema = schema,pageId = pageId)
-        start = (self.pageId.pageIndex * self.pageSize() + self.p.headerSize)
+    if(self.validPageId(pageId) and self.header):
+        start = self.pageOffset(pageId)
+        self.file.seek(start)
         end = start + self.pageSize()
-        return self.file.read()[start : end]
+        headerPart = self.file.read(self.pageClass().headerClass.binrepr.size)
+        bytesObj = io.BytesIO(headerPart)
+        return self.pageClass().headerClass.unpack(bytesObj.getbuffer())
     else:
         raise ValueError("The pageId was invalid.")
     #raise NotImplementedError
@@ -377,16 +373,23 @@ class StorageFile:
 
   def readPage(self, pageId, page):
     #self.file = open(self.filePath,'r+b')
-    start = self.pageOffset(pageId)
-    end = start + self.pageSize()
-    page = SlottedPage.unpack(pageId = pageId,buffer = self.file.read()[start:end])
-    return page
+    #self.file.seek(0)
+    if self.validPageId(pageId):
+      start = self.pageOffset(pageId)
+      end = start + self.pageSize()
+      self.file.seek(start)
+      self.file.readinto(page)
+      page = self.pageClass().unpack(pageId, page)
+      return page
+    else:
+        raise ValueError("The page was invalid.")
     #raise NotImplementedError
 
   def writePage(self, page):
     #self.file = open(self.filePath,'r+b')
     if(page):
-        self.file.seek((page.pageId.pageIndex * self.pageSize()) + self.headerSize())
+        self.file.seek(0)
+        self.file.seek(((page.pageId.pageIndex) * self.pageSize()) + self.headerSize())
         self.file.write(page.pack())
         self.file.flush()
     else:
