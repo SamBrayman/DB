@@ -534,7 +534,7 @@ class SlottedPage(Page):
   # within the page by packing the header in place.
   def pack(self):
     #raise NotImplementedError
-    return self.header.pack() + struct.pack('H',self.pageId.fileId) + struct.pack('H',pageId.pageIndex)
+    return self.header.pack()# + struct.pack('H',self.pageId.fileId) + struct.pack('H',pageId.pageIndex)
 
   # Creates a Page instance from the binary representation held in the buffer.
   # The pageId of the newly constructed Page instance is given as an argument.
