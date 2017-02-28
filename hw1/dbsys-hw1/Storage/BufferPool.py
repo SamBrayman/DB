@@ -40,11 +40,12 @@ class BufferPool:
     self.poolSize     = kwargs.get("poolSize", BufferPool.defaultPoolSize)
     self.pool         = io.BytesIO(b'\x00' * self.poolSize)
     self.map = OrderedDict()
+    self.mapfree = OrderedDict()
     ####################################################################################
     # DESIGN QUESTION: what other data structures do we need to keep in the buffer pool?
-    #self.freeList     = []
-    #for i in range(self.numPages):
-    #    self.freeList.append(0)
+
+
+
 
 
   def setFileManager(self, fileMgr):
@@ -53,10 +54,10 @@ class BufferPool:
   # Basic statistics
 
   def numPages(self):
-    return math.floor(self.poolSize / self.pageSize)
+    return len(self.map)
 
   def numFreePages(self):
-    return self.poolSize - (len(self.map)*self.pageSize)
+    return len(self.mapfree)
     #raise NotImplementedError
 
   def size(self):
@@ -82,16 +83,17 @@ class BufferPool:
     if(self.hasPage(pageId)):
         start = pageId.pageIndex * self.pageSize
         end = self.pageSize
-        page = self.fileMgr.readPage(pageId,self.fileMgr.pool.getbuffer()[start:end])
+        page = self.fileMgr.readPage(pageId,self.pool.getbuffer()[start:end])
+        self.map[pageId] = page
         return page
     else:
-        try:
             start = pageId.pageIndex * self.pageSize
-            end = self.pageSize
-            page = self.fileMgr.readPage(pageId,self.fileMgr.bufferPool.getbuffer()[start:end])
+            end = start + self.pageSize
+            page = self.fileMgr.readPage(pageId,self.pool.getbuffer()[start:end])
+            self.map[pageId] = page
             return page
-        except:
-            raise ValueError("")
+
+
 
     #raise NotImplementedError
 
@@ -100,6 +102,7 @@ class BufferPool:
   def discardPage(self, pageId):
     if(self.hasPage(pageId)):
         self.map.pop(pageId,None)
+        self.mapfree[pageId] = self.getPage(pageId)
     else:
         raise ValueError("This page is not in the buffer pool.")
     #raise NotImplementedError
@@ -118,7 +121,8 @@ class BufferPool:
   def evictPage(self):
     if(self.usedSpace != 0):
         tup = self.map.popitem(last=True)
-        page = self.getPage(page)
+        self.mapfree.pop(tup(0),None)
+        page = self.getPage(tup(0))
         if(page.isDirty()):
             self.flushPage(page.pageId)
     else:
