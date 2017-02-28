@@ -178,14 +178,29 @@ class StorageFile:
 
   # Write out pages and sync to disk.
   >>> f.writePage(p)
+  >>> f.headerSize()
+
+
   >>> f.writePage(p1)
   >>> f.flush()
-  
+
+  # Page Size
+  >>> f.size()
+  f.pageSize()
+
   # Check the number of pages, and the file size.
   >>> f.numPages() == 2
   True
 
   >>> f.size() == (f.headerSize() + f.pageSize() * 2)
+  True
+
+  >>> pId2 = PageId(fId, 2)
+  >>> p2    = SlottedPage(pageId=pId,  buffer=bytes(f.pageSize()), schema=schema)
+  >>> for tup in [schema.pack(schema.instantiate(i, i+20)) for i in range(10, 20)]:
+  ...    _ = p1.insertTuple(tup)
+  ...
+  >>> f.numPages() == 2
   True
 
   # Read pages in reverse order testing offset and page index.
@@ -371,9 +386,8 @@ class StorageFile:
   def writePage(self, page):
     #self.file = open(self.filePath,'r+b')
     if(page):
-        self.file.seek(page.pageId.pageIndex * self.pageSize() + page.header.headerSize())
+        self.file.seek((page.pageId.pageIndex * self.pageSize()) + self.headerSize())
         self.file.write(page.pack())
-        self.file.seek(0)
         self.file.flush()
     else:
         raise ValueError("The page is invalid.")
@@ -381,11 +395,10 @@ class StorageFile:
     #self.file.close()
   # Adds a new page to the file by writing past its end.
   def allocatePage(self):
-      pageIndex = self.numPages()
-      pageId = (self.fileId,pageIndex)
-      page = SlottedPage(pageId = pageId,schema = self.schema(),buffer = bytes(self.pageSize()))
+      pageId = self.pageId(self.numPages())
+      page = self.pageClass()(pageId = pageId,schema = self.schema(),buffer = bytes(self.pageSize()))
       self.writePage(page)
-      self.file.flush()
+      return page
     #raise NotImplementedError
 
   # Returns the page id of the first page with available space.
@@ -395,8 +408,8 @@ class StorageFile:
             if(page.header.hasFreeTuple()):
                 return page.pageId
     else:
-        self.allocatePage()
-        return self.numPages()-1
+        page = self.allocatePage()
+        return page.pageId
     #raise NotImplementedError
 
 
