@@ -95,9 +95,8 @@ class SlottedPageHeader(PageHeader,BytesIO):
     self.flags = kwargs.get("flags", b'\x00')
     if buffer:
       #raise NotImplementedError
-      #PageHeader._init_(self, **kwargs)
       self.flags           = kwargs.get("flags", b'\x00')
-      self.tupleSize       = kwargs.get("tupleSize", None)
+      self.tupleSize       = kwargs.get("tupleSize", 0)
       self.pageCapacity    = kwargs.get("pageCapacity", len(buffer))
       self.slots = kwargs.get("slots",0)
       self.freeoffset = kwargs.get("offset",0)
@@ -110,7 +109,6 @@ class SlottedPageHeader(PageHeader,BytesIO):
       else:
         for elem in self.slotBuffer:
             self.Storage.append(elem)
-      self.slots = len(self.Storage)
       self.freeSpaceOffset = kwargs.get("freeSpaceOffset", self.headerSize())    #None
     else:
       raise ValueError("No backing buffer supplied for SlottedPageHeader")
@@ -123,7 +121,7 @@ class SlottedPageHeader(PageHeader,BytesIO):
     else:
         for i in range(self.slots):
             same = (self.Storage[i] == other.Storage[i]) 
-        return PageHeader._eq_(self, other) and self.slots == other.slots and self.freeoffset == other.freeoffset and same
+        return self._eq_(self, other) and self.slots == other.slots and self.freeoffset == other.freeoffset and same
 
 
   def __hash__(self):
@@ -155,11 +153,7 @@ class SlottedPageHeader(PageHeader,BytesIO):
 
   def numTuples(self):
     #raise NotImplementedError
-    count = 0
-    for elem in self.Storage:
-        if elem == 1:
-            count+=1
-    return count
+    return self.slots
 
   # Returns the space available in the page associated with this header.
   def freeSpace(self):
@@ -169,11 +163,7 @@ class SlottedPageHeader(PageHeader,BytesIO):
   # Returns the space used in the page associated with this header.
   def usedSpace(self):
     #raise NotImplementedError
-    tuples = 0
-    for elem in self.Storage:
-        if(elem == 1):
-            tuples+=1
-    return tuples * self.tupleSize
+    return self.numTuples() * self.tupleSize
 
 
   # Slot operations.
@@ -210,6 +200,10 @@ class SlottedPageHeader(PageHeader,BytesIO):
         #end = start + self.tupleSize
         #self.buffer[start:end] = slot
         self.Storage[slotIndex] = slot
+        if(slot == 1):
+            self.slots += 1
+        else:
+            self.slots -= 1
         #self.slots+=1
     else:
         raise ValueError("The index was out of bounds.")
@@ -275,16 +269,20 @@ class SlottedPageHeader(PageHeader,BytesIO):
   def pack(self):
     #raise NotImplementedError
     #pack each index in the storage array
-    temp = ""
-    for i in range(len(Storage)):
-        temp = temp + struct.pack('H',Storage[i])
-    return PageHeader.pack() + struct.pack('H',slots) + struct.pack('H',self.freeoffset) + temp
+    temp = b""
+    for i in range(self.usedSlots()):
+        temp = temp + struct.pack('H',self.Storage[i])
+    binrepr = struct.Struct("cHHH")
+    supPack = binrepr.pack(self.flags, self.tupleSize, self.freeSpaceOffset, self.pageCapacity)
+    return supPack + struct.pack('H',self.slots) + struct.pack('H',self.freeoffset) + temp
 
   # Create a slotted page header instance from a binary representation held in the given buffer.
   @classmethod
   def unpack(cls, buffer):
     #raise NotImplementedError
-    values = PageHeader.binrepr.unpack_from(buffer)
+    #values = PageHeader.binrepr.unpack_from(buffer)
+    binrepr = struct.Struct("cHHH")
+    values = binrepr.unpack_from(BytesIO(buffer).getbuffer())
     values2 = SlottedPageHeader.binrepr.unpack_from(buffer,offset=SlottedPageHeader.binrepr.size)
     temp = ""
     for i in range(values2[0]):
@@ -415,7 +413,7 @@ class SlottedPage(Page):
   def __init__(self, **kwargs):
     buffer = kwargs.get("buffer", None)
     BytesIO.__init__(self, buffer)
-    self.pageId = kwargs.get("pageId", None)
+    self.pageId = kwargs.get("pageId", 0)
     header      = kwargs.get("header", None)
     schema      = kwargs.get("schema", None)
     if buffer:
@@ -536,16 +534,15 @@ class SlottedPage(Page):
   # within the page by packing the header in place.
   def pack(self):
     #raise NotImplementedError
-    return self.header.pack() + self.schema.packSchema() + struct.pack('H',pageId)
+    return self.header.pack() + struct.pack('H',self.pageId.fileId) + struct.pack('H',pageId.pageIndex)
 
   # Creates a Page instance from the binary representation held in the buffer.
   # The pageId of the newly constructed Page instance is given as an argument.
   @classmethod
   def unpack(cls, pageId, buffer):
     #raise NotImplementedError
-    
-    values = cls.header.unpack(SlottedPageHeader,buffer)
-    values2 = Catalog.Schema.unpackSchema(Schema,buffer)
+    values = cls.headerClass.unpack(BytesIO(buffer).getbuffer())
+    #values2 = Catalog.Schema.unpackSchema(Schema,buffer)
     return cls(buffer=buffer,schema = values2, pageId = pageId,header = values )
 
 
