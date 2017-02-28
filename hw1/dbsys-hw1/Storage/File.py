@@ -261,17 +261,17 @@ class StorageFile:
     # The file header may come from the file contents (i.e., if the file already exists),
     # otherwise it should be created from scratch.
      
-    if(self.mode == 'create'):
+    if(self.mode == 'create' or self.mode == 'truncate'):
             self.header = FileHeader(pageSize=pageSize,pageClass=pageClass,schema=schema)
             self.file = open(self.filePath,'w+b')
             self.file.flush()
     elif(self.mode == 'update'):
             self.file = open(self.filePath,'r+b')
             self.header = FileHeader.fromFile(self.file)
-    elif(self.mode == 'truncate'):
-            self.file = open(self.filePath,'w+b')
-            self.header = FileHeader.fromFile(self.file) 
-            self.file.flush()
+    #elif(self.mode == 'truncate'):
+    #        self.file = open(self.filePath,'w+b')
+    #        self.header = FileHeader.fromFile(self.file) 
+    #        self.file.flush()
     else:
             raise ValueError("No mode was given.")
 
@@ -364,7 +364,8 @@ class StorageFile:
     #self.file = open(self.filePath,'r+b')
     start = self.pageOffset(pageId)
     end = start + self.pageSize()
-    page = SlottedPage.unpack(buffer = self.file.read()[start:end])
+    page = SlottedPage.unpack(pageId = pageId,buffer = self.file.read()[start:end])
+    return page
     #raise NotImplementedError
 
   def writePage(self, page):
@@ -381,9 +382,10 @@ class StorageFile:
   # Adds a new page to the file by writing past its end.
   def allocatePage(self):
       pageIndex = self.numPages()
-      pageId = PageId(self.fileId,pageIndex)
-      Page(pageId = pageId,schema = self.schema(),buffer = self.bufferPool.pool.getbuffer())
+      pageId = (self.fileId,pageIndex)
+      page = SlottedPage(pageId = pageId,schema = self.schema(),buffer = bytes(self.pageSize()))
       self.writePage(page)
+      self.file.flush()
     #raise NotImplementedError
 
   # Returns the page id of the first page with available space.
@@ -394,6 +396,7 @@ class StorageFile:
                 return page.pageId
     else:
         self.allocatePage()
+        return self.numPages()-1
     #raise NotImplementedError
 
 
