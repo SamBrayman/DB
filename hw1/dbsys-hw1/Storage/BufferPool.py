@@ -79,11 +79,18 @@ class BufferPool:
         return False
     #raise NotImplementedError
   
+  def insertPage(self,page):
+      start = page.pageId.pageIndex * self.pageSize
+      end = start + self.pageSize
+      pool.getbuiffer()[start:end] = page.pack()
+      self.map[page.pageId] = page
+
+
   def getPage(self, pageId):
     if(self.hasPage(pageId)):
         start = pageId.pageIndex * self.pageSize
         end = self.pageSize
-        page = self.fileMgr.readPage(pageId,self.pool.getbuffer()[start:end])
+        page = self.pool.getbuffer()[start:end]
         self.map[pageId] = page
         return page
     else:
@@ -91,6 +98,7 @@ class BufferPool:
             end = start + self.pageSize
             page = self.fileMgr.readPage(pageId,self.pool.getbuffer()[start:end])
             self.map[pageId] = page
+            self.insertPage(page)
             return page
 
 
@@ -111,6 +119,7 @@ class BufferPool:
     if(self.hasPage(pageId)):
         page = self.getPage(pageId)
         self.fileMgr.writePage(page)
+        self.discardPage(pageId)
     else:
         raise ValueError("This page is not in the buffer pool.")
     #raise NotImplementedError
