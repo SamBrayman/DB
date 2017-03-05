@@ -1,0 +1,35 @@
+from Storage import File
+from Storage import SlottedPage
+from Storage import Page       
+from Storage import BufferPool
+import sys                                                                                 
+from Storage.BufferPool import BufferPool
+from Catalog.Identifiers import FileId, PageId, TupleId                                    
+from Catalog.Schema import DBSchema                                                        
+schema = DBSchema('employee', [('id', 'int'), ('age', 'int')])                             
+pId = PageId(FileId(1), 100)                                                               
+from Storage.Page import Page
+from Storage.SlottedPage import SlottedPage
+from Storage.File import StorageFile
+from Storage.FileManager import FileManager
+SlottedPage(pageId=pId,buffer = bytes(4096),schema=schema)
+p = SlottedPage(pageId=pId,buffer = bytes(4096),schema=schema)
+p_pack = p.pack()
+buff = bytes(4096)
+from io import BytesIO
+buffr = BytesIO(buff)
+buffr.getbuffer()
+buffr.getbuffer()[0:p.header.headerSize()] = p.pack()
+p_unpack = SlottedPage.unpack(pId,buffer = buffr.getbuffer())
+p_unpack.header.isDirty()
+p_unpack.header.usedSpace()
+p_unpack.header.hasFreeTuple()
+buffr.getbuffer()[0:p.header.headerSize()] = p.pack()
+buffr.getbuffer()
+p.header.usedSpace()
+e1 = schema.instantiate(0, 25 + 0)
+p.insertTuple(schema.pack(e1))
+buffr.getbuffer()[0:p.header.headerSize()] = p.pack()
+p.header.usedSpace()
+unpack = SlottedPage.unpack(pId,buffer = buffr.getbuffer())
+p_unpack.header.usedSpace()

@@ -1,0 +1,12 @@
+Sam Brayman - sbrayma1
+Michael Oluwole - moluwol1
+
+Design Choices:
+Contiguous page uses the absolute offset as the index.  Therefore it rejects inserting a tuple if the index is not greater than the header size.
+
+Slotted page inherits from Page and SlottedPageHeader inherits from PageHeader.
+For slotted page we keep track of the amount of space added to the bit map per tuple added.  
+
+All of the unit tests/doctests (page and slotted page) pass.
+
+
