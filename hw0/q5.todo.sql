@@ -14,3 +14,24 @@
 -- Student SQL code here:
 
 
+WITH go AS (
+	SELECT customer.mktsegment AS c_m_s, CAST(strftime('%Y', orders.orderdate) AS INTEGER) AS year, COUNT(orders.orderkey) AS num_orders
+  	FROM customer
+    	INNER JOIN orders ON orders.custkey = customer.custkey
+  	GROUP BY c_m_s, year
+),
+
+go2 AS (
+	SELECT customer.mktsegment AS c_m_s, MAX(CAST(strftime('%Y', orders.orderdate) AS INTEGER)) AS last_year
+	FROM customer
+  	INNER JOIN orders ON customer.custkey = orders.custkey
+  	GROUP BY c_m_s
+)
+
+
+
+SELECT go2.c_m_s, go2.last_year, table2.num_orders - table3.num_orders AS diff
+FROM go2
+INNER JOIN go AS table2 ON go2.c_m_s = table2.c_m_s AND go2.last_year = table2.year
+INNER JOIN go AS table3 ON table2.year = table3.year + 1 AND table2.c_m_s = table3.c_m_s AND diff < 0
+ORDER BY go2.c_m_s ASC;
