@@ -5,9 +5,10 @@
 
 -- Student SQL code here:
 
-select part.partkey, part.name, sum(lineitem.quantity)
-from lineitem inner join part on lineitem.partkey = part.partkey
-where lineitem.returnflag = 'R'
-group by lineitem.partkey
-order by sum(lineitem.quantity) desc
-limit 10;
+SELECT part.partkey, part.name, SUM(lineitem.quantity)
+FROM lineitem 
+INNER JOIN part ON lineitem.partkey = part.partkey
+WHERE lineitem.returnflag = 'R'
+GROUP BY lineitem.partkey
+ORDER BY sum(lineitem.quantity) DESC
+LIMIT 10;
