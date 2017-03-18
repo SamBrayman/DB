@@ -1,5 +1,6 @@
 from Catalog.Schema import DBSchema
 from Query.Operator import Operator
+from itertools import *
 
 class Union(Operator):
   def __init__(self, lhsPlan, rhsPlan, **kwargs):

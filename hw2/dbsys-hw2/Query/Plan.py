@@ -1,6 +1,6 @@
 import math, random, sys
 from collections import deque
-
+from itertools import *
 from Catalog.Schema  import DBSchema
 
 from Query.Operators.TableScan import TableScan
