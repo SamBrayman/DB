@@ -234,7 +234,87 @@ class PlanBuilder:
   >>> [query3.schema().unpack(tup).id for page in db.processQuery(query3) for tup in page[1]] # doctest:+ELLIPSIS
   [0, 1, 2, ..., 19, 0, 1, 2, ..., 19]
 
+  ### SELECT * FROM Employee E1 JOIN Employee E2 ON E1.id = E2.id
+  >>> e2schema = schema.rename('employee2', {'id':'id2', 'age':'age2'})
 
+  >>> query4 = db.query().fromTable('employee').join( \
+        db.query().fromTable('employee'), \
+        rhsSchema=e2schema, \
+        method='block-nested-loops', expr='id == id2').finalize()
+
+  >>> print(query4.explain()) # doctest: +ELLIPSIS
+  BNLJoin[...,cost=...](expr='id == id2')
+    TableScan[...,cost=...](employee)
+    TableScan[...,cost=...](employee)
+
+  >>> q4results = [query4.schema().unpack(tup) for page in db.processQuery(query4) for tup in page[1]]
+  >>> [(tup.id, tup.id2) for tup in q4results] # doctest:+ELLIPSIS
+  [(0, 0), (1, 1), (2, 2), ..., (18, 18), (19, 19)]
+
+  ### Hash join test with the same query.
+  ### SELECT * FROM Employee E1 JOIN Employee E2 ON E1.id = E2.id
+  >>> e2schema   = schema.rename('employee2', {'id':'id2', 'age':'age2'})
+  >>> keySchema  = DBSchema('employeeKey',  [('id', 'int')])
+  >>> keySchema2 = DBSchema('employeeKey2', [('id2', 'int')])
+
+  >>> query5 = db.query().fromTable('employee').join( \
+          db.query().fromTable('employee'), \
+          rhsSchema=e2schema, \
+          method='hash', \
+          lhsHashFn='hash(id) % 4',  lhsKeySchema=keySchema, \
+          rhsHashFn='hash(id2) % 4', rhsKeySchema=keySchema2, \
+        ).finalize()
+
+  >>> print(query5.explain()) # doctest: +ELLIPSIS
+  HashJoin[...,cost=...](lhsKeySchema=employeeKey[(id,int)],rhsKeySchema=employeeKey2[(id2,int)],lhsHashFn='hash(id) % 4',rhsHashFn='hash(id2) % 4')
+    TableScan[...,cost=...](employee)
+    TableScan[...,cost=...](employee)
+
+  >>> q5results = [query5.schema().unpack(tup) for page in db.processQuery(query5) for tup in page[1]]
+  >>> sorted([(tup.id, tup.id2) for tup in q5results]) # doctest:+ELLIPSIS
+  [(0, 0), (1, 1), (2, 2), ..., (18, 18), (19, 19)]
+
+  ### Group by aggregate query
+  ### SELECT id, max(age) FROM Employee GROUP BY id
+  >>> aggMinMaxSchema = DBSchema('minmax', [('minAge', 'int'), ('maxAge','int')])
+  >>> query6 = db.query().fromTable('employee').groupBy( \
+          groupSchema=keySchema, \
+          aggSchema=aggMinMaxSchema, \
+          groupExpr=(lambda e: e.id), \
+          aggExprs=[(sys.maxsize, lambda acc, e: min(acc, e.age), lambda x: x), \
+                    (0, lambda acc, e: max(acc, e.age), lambda x: x)], \
+          groupHashFn=(lambda gbVal: hash(gbVal[0]) % 2) \
+        ).finalize()
+
+  >>> print(query6.explain()) # doctest: +ELLIPSIS
+  GroupBy[...,cost=...](groupSchema=employeeKey[(id,int)], aggSchema=minmax[(minAge,int),(maxAge,int)])
+    TableScan[...,cost=...](employee)
+
+  >>> q6results = [query6.schema().unpack(tup) for page in db.processQuery(query6) for tup in page[1]]
+  >>> sorted([(tup.id, tup.minAge, tup.maxAge) for tup in q6results]) # doctest:+ELLIPSIS
+  [(0, 20, 20), (1, 22, 22), ..., (18, 56, 56), (19, 58, 58)]
+
+  ### Order by query
+  ### SELECT id FROM Employee ORDER by age
+  >>> query7 = db.query().fromTable('employee') \
+        .order(sortKeyFn=lambda x: x.age, sortKeyDesc='age') \
+        .select({'id': ('id', 'int')}).finalize()
+
+  >>> print(query7.explain()) # doctest: +ELLIPSIS
+  Project[...,cost=...](projections={'id': ('id', 'int')})
+    Sort[...,cost=...](sortKeyDesc='age')
+      TableScan[...,cost=...](employee)
+
+  # Populate employees relation with another 10000 tuples
+  >>> for tup in [schema.pack(schema.instantiate(i, math.ceil(random.gauss(45, 25)))) for i in range(10000)]:
+  ...    _ = db.insertTuple(schema.name, tup)
+  ...
+
+  ### Sample 1/10th of: SELECT * FROM Employee WHERE age < 30
+  >>> query8 = db.query().fromTable('employee').where("age < 30").finalize()
+  >>> estimatedSize = query8.sample(10)
+  >>> estimatedSize > 0
+  True
 
   """
 
