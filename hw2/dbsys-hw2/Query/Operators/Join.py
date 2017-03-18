@@ -1,7 +1,8 @@
-import itertools
+from itertools import chain
 
 from Catalog.Schema import DBSchema
 from Query.Operator import Operator
+from Storage.BufferPool import BufferPool
 
 class Join(Operator):
   def __init__(self, lhsPlan, rhsPlan, **kwargs):
@@ -166,11 +167,56 @@ class Join(Operator):
   # This method pins pages in the buffer pool during its access.
   # We track the page ids in the block to unpin them after processing the block.
   def accessPageBlock(self, bufPool, pageIterator):
-    raise NotImplementedError
+    #raise NotImplementedError
+    for (pageId,page) in pageIterator:
+        #if(bufPool.numFreePages() != 2):
+        if ~bufPool.hasPage(pageId):
+            bufPool.getPage(pageId)
+            bufPool.pinPage(pageId)
+        else:
+            bufPool.pinPage(pageId)
+        #else:
+        #    break
+  def accessPageBlock2(self, bufPool, pageIterator):
+    #raise NotImplementedError
+    for (pageId,page) in pageIterator:
+        #if(bufPool.numFreePages() != 2):
+        bufPool.unpinPage(pageId)
+        #else:
+        #    break
 
   def blockNestedLoops(self):
-    raise NotImplementedError
+    #raise NotImplementedError
+    bufPool = self.storage.bufferPool
+    blocks = [[]]
+    ind = 0
+    for (pageId,page) in iter(self.lhsPlan):
+        if(len(blocks[ind]) < self.storage.bufferPool.numPages()-2):
+            blocks[ind].append((pageId,page))
+        else:
+            ind += 1
+            blocks.append([])
+            blocks[ind].append((pageId,page))
+    for block in blocks:
+        self.accessPageBlock(bufPool,block)
+        for tup in block:
+            for lTuple in tup[1]:
+                joinExprEnv = self.loadSchema(self.lhsSchema, lTuple)
+                for (rpageId,rhsPage) in iter(self.rhsPlan):
+                    for rTuple in rhsPage:
+                        # Load the RHS tuple fields.
+                        joinExprEnv.update(self.loadSchema(self.rhsSchema, rTuple))
+                        #Evaluate the join predicate, and output if we have a match.
+                        if eval(self.joinExpr, globals(), joinExprEnv):
+                            outputTuple = self.joinSchema.instantiate(*[joinExprEnv[f] for f in self.joinSchema.fields])
+                            self.emitOutputTuple(self.joinSchema.pack(outputTuple))
+                # No need to track anything but the last output page when in batch mode.
+                if self.outputPages:
+                    self.outputPages = [self.outputPages[-1]]
+        self.accessPageBlock2(bufPool,block)
 
+    # Return an iterator to the output relation
+    return self.storage.pages(self.relationId())
 
   ##################################
   #
