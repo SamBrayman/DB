@@ -187,7 +187,7 @@ class BufferPool:
   #    if page.isDirty():
   #      self.flushPage(pageId)
   local_clear = []
-  for (pageId, (offset, page, _)) in self.pageMap.items():
+  for (pageId, (offset, page, _)) in list(self.pageMap.items()):
     if page.isDirty():
       local_clear.append((pageId, (offset, page, _)))
   for (pageId, (offset, page, _)) in local_clear:
