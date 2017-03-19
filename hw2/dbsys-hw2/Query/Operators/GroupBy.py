@@ -15,6 +15,7 @@ class GroupBy(Operator):
     self.groupExpr   = kwargs.get("groupExpr", None)
     self.aggExprs    = kwargs.get("aggExprs", None)
     self.groupHashFn = kwargs.get("groupHashFn", None)
+    self.groupByExpr = None
 
     self.validateGroupBy()
     self.initializeSchema()
@@ -76,12 +77,79 @@ class GroupBy(Operator):
   # Set-at-a-time operator processing
   def processAllPages(self):
     #raise NotImplementedError
-    for (pageId, page) in inputIterator:
+    hshKeys = {}
+    absLst = []
+    for i in range(len(self.aggExprs)):
+        absLst.append(self.aggExprs[i][0])
+    schema = self.subPlan.schema()
+    for (pageId, page) in self.inputIterator:
       for inputTuple in page:
-
         #need tuple not as MemoryView, unpack
         unpackedTuple = self.subSchema.unpack(inputTuple)
-        groupValue = self.groupExpr(unpackedTuple)
+        #print(page)
+        #print(unpackedTuple)
+        groupValue = (self.groupExpr(unpackedTuple),)
+        partKey = self.groupHashFn(groupValue)
+        if(~self.storage.hasRelation(str(partKey))):
+            self.storage.createRelation(str(partKey),self.subSchema)
+        self.storage.insertTuple(str(partKey),inputTuple)
+        for i in range(len(self.aggExprs)):
+            absLst[i] = self.aggExprs[i][1](absLst[i],unpackedTuple)
+            #self.aggExprs[i] = (self.aggExprs[i][1](self.aggExprs[i][0],unpackedTuple),self.aggExprs[i][1],self.aggExprs[i][2])
+            #lst.append(self.aggExprs[i][1](self.aggExprs[i][0],unpackedTuple))
+        hshKeys[str(partKey)] = 0#tuple(lst)
+    #for tup in self.storage.tuples():
+    #    groupValue = self.groupExpr(self.subSchema.unpack(tup))
+    #    for i in range(len(self.aggExprs)):
+    #        if(groupValue == self.aggExprs[i][0]):
+    #            hshKeys.append(self.groupHashFn(groupValue))
+    #finalAgs = []
+    #for i in range(len(self.aggExprs)):
+    #    finalAgs.append(self.aggExprs[i][0])
+    #finalAgs = tuple(finalAgs)
+    #extremes = []
+    #for i in range(len(self.aggExprs)):
+    #    extremes.append(0)
+    #for key in hshKeys:
+    #    for i in range(len(self.aggExprs)):
+    #        extremes[i] = self.aggExprs[i][1](extremes[i],hshKeys[key])
+    #for key in hshKeys:
+        #print(hshKeys[key][0])
+        #print(finalAgs)
+        #want = False
+        #for i in range(len(self.aggExprs)):
+        #    if(self.aggExprs[i][1](self.aggExprs[i][0]) == hshKeys):
+        #        want = true
+        #if want:#self.aggExprs[][]hshKeys[key] == self.aggExprs:
+    #for (pageId,page) in self.storage.pages(key):
+    #absLst = []
+    #for i in range(len(self.aggExprs)):
+    #    absLst.append(self.aggExprs[i][0])
+    #print(absLst)
+    #print(len(hshKeys))
+    for key in hshKeys:
+        #for (pageId,page) in self.storage.pages(key):
+    #for (pageId, page) in self.inputIterator:
+            #print(page)
+            #for tup in page:
+            for tup in self.storage.tuples(key):
+                #print(tup)
+                #want = False
+                upackedTuple = self.subSchema.unpack(tup)
+                print(unpackedTuple)
+                for i in range(len(self.aggExprs)):
+                    #print(want)
+                    if(self.aggExprs[i][1](self.aggExprs[i][0],unpackedTuple) == absLst[i]):
+                        #print(str(absLst[i]) + " " + str(unpackedTuple.age))
+                        #print(want)
+                        groupByExprEnv = self.loadSchema(schema, tup)
+                        #if eval(self.groupByExpr, globals(), groupByExprEnv):
+                        #outputTuple = self.joinSchema.instantiate(*[joinExprEnv[f] for f in self.joinSchema.fields])
+                        self.emitOutputTuple(tup)
+                        if self.outputPages:
+                            self.outputPages = [self.outputPages[-1]]
+    return self.storage.pages(self.relationId())
+
 
 
 
