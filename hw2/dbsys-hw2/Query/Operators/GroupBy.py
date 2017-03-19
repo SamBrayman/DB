@@ -78,8 +78,11 @@ class GroupBy(Operator):
     #raise NotImplementedError
     for (pageId, page) in inputIterator:
       for inputTuple in page:
-        #
-        groupValue = self.groupExpr(inputTuple)
+
+        #need tuple not as MemoryView, unpack
+        unpackedTuple = self.subSchema.unpack(inputTuple)
+        groupValue = self.groupExpr(unpackedTuple)
+
 
 
 
