@@ -97,9 +97,10 @@ class Join(Operator):
   def __iter__(self):
     #raise NotImplementedError
     self.initializeOutput()
-    self.inputIterator = chain(iter(self.lhsPlan),iter(self.rhsPlan))
+    self.inputIterator = chain(self.lhsPlan,self.rhsPlan)
     self.inputFinished = False
     self.outputIterator = self.processAllPages()
+    return self
 
 
   def __next__(self):
