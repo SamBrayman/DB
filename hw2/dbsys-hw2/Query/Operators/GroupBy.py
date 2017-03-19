@@ -59,10 +59,15 @@ class GroupBy(Operator):
 
   # Iterator abstraction for selection operator.
   def __iter__(self):
-    raise NotImplementedError
+    #raise NotImplementedError
+    self.initializeOutput()
+    self.inputIterator = iter(self.subPlan)
+    self.outputIterator = self.processAllPages()
+    return self
 
   def __next__(self):
-    raise NotImplementedError
+    #raise NotImplementedError
+    return next(self.outputIterator)
 
   # Page-at-a-time operator processing
   def processInputPage(self, pageId, page):
@@ -70,7 +75,15 @@ class GroupBy(Operator):
 
   # Set-at-a-time operator processing
   def processAllPages(self):
-    raise NotImplementedError
+    #raise NotImplementedError
+    for (pageId, page) in inputIterator:
+      for inputTuple in page:
+        #
+        groupValue = self.groupExpr(inputTuple)
+
+
+
+
 
   # Plan and statistics information
 
