@@ -208,6 +208,7 @@ class Join(Operator):
                         # Load the RHS tuple fields.
                         joinExprEnv.update(self.loadSchema(self.rhsSchema, rTuple))
                         #Evaluate the join predicate, and output if we have a match.
+                        #print(globals())
                         if eval(self.joinExpr, globals(), joinExprEnv):
                             outputTuple = self.joinSchema.instantiate(*[joinExprEnv[f] for f in self.joinSchema.fields])
                             self.emitOutputTuple(self.joinSchema.pack(outputTuple))
