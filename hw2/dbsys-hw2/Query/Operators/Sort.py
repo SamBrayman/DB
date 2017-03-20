@@ -32,20 +32,42 @@ class Sort(Operator):
 
   # Iterator abstraction for external sort operator.
   def __iter__(self):
-    raise NotImplementedError
+    self.initializeOutput()
+    self.inputIterator = iter(self.subPlan)
+    self.inputFinished = False
+
+    if not self.pipelined:
+        self.outputIterator = self.processAllPages()
+
+    return self
 
   def __next__(self):
-    raise NotImplementedError
+    #raise NotImplementedError
+    if not self.piplined:
+        while not (self.inputFinished or self.isOutputPageReady()):
+            try:
+                pageId, page = next(self.inputIterator)
+                self.processInputPage(pageId, page)
+
+            except StopIteration:
+                self.inputFinished = True
+        return self.outputPage()
+    
+    else:
+        return next(self.outputIterator)
+
+
+
 
   # Page processing and control methods
 
   # Page-at-a-time operator processing
   def processInputPage(self, pageId, page):
-    raise NotImplementedError
+    #raise NotImplementedError
 
   # Set-at-a-time operator processing
   def processAllPages(self):
-    raise NotImplementedError
+    #raise NotImplementedError
 
 
   # Plan and statistics information
