@@ -305,7 +305,10 @@ class Join(Operator):
                             self.outputPages = [self.outputPages[-1]]
                 self.accessPageBlock2(bufPool,block)
                 ind +=1
-
+    for key1 in keysL.keys():
+        self.storage.removeRelation(key1)
+    for key1 in keysR.keys():
+        self.storage.removeRelation(key1)
     return self.storage.pages(self.relationId())
 
 

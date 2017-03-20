@@ -131,6 +131,8 @@ class GroupBy(Operator):
                         self.emitOutputTuple(self.outputSchema.pack(outputTuple))
             if self.outputPages:
                 self.outputPages = [self.outputPages[-1]]
+    for key in hshKeys:
+        self.storage.removeRelation(key)
     return self.storage.pages(self.relationId())
 
 
