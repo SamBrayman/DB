@@ -280,7 +280,7 @@ class PlanBuilder:
   >>> query6 = db.query().fromTable('employee').groupBy( \
           groupSchema=keySchema, \
           aggSchema=aggMinMaxSchema, \
-          groupExpr=(lambda e: e.id), \
+          groupExpr=(lambda e: e.id%2), \
           aggExprs=[(sys.maxsize, lambda acc, e: min(acc, e.age), lambda x: x), \
                     (0, lambda acc, e: max(acc, e.age), lambda x: x)], \
           groupHashFn=(lambda gbVal: hash(gbVal[0]) % 2) \

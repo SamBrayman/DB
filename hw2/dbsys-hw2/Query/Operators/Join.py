@@ -233,8 +233,133 @@ class Join(Operator):
   # Hash join implementation.
   #
   def hashJoin(self):
-    raise NotImplementedError
+    #raise NotImplementedError
+    count = 1
+    bufPool = self.storage.bufferPool
+    blocksL = [[]]
+    blocksR = [[]]
+    keysL = {}
+    keysR = {}
+    ind = 0
+    #print(type(self.lhsHashFn))
+    for (pageId,page) in iter(self.lhsPlan):
+        for lTuple in page:
+            partKey = eval(self.lhsHashFn,globals(),self.loadSchema(self.lhsSchema,lTuple))
+            self.storage.createRelation(str(partKey) + str(0),self.lhsSchema)
+            self.storage.insertTuple(str(partKey) + str(0),lTuple)
+            keysL[partKey] = 0
+    for (pageId,page) in iter(self.rhsPlan):
+        for rTuple in page:
+            partKey = eval(self.rhsHashFn,globals(),self.loadSchema(self.rhsSchema,rTuple))
+            self.storage.createRelation(str(partKey) + str(1),self.rhsSchema)
+            self.storage.insertTuple(str(partKey) + str(1),rTuple)
+            keysR[partKey] = 1
+    for key1 in keysL.keys():
+        if(key1 in keysR.keys()):
+            ind = 0
+            blocksL = [[]]
+            blocksR = [[]]
+            for (pageId,page) in self.storage.pages(str(key1) + str(0)):
+                #print(len(blocksL))
+                #print(ind)
+                #print(key1)
+                if(len(blocksL[ind]) < self.storage.bufferPool.numPages()-2):
+                    blocksL[ind].append((pageId,page))
+                else:
+                    ind += 1
+                    blocksL.append([])
+                    blocksL[ind].append((pageId,page))
+            ind = 0
+            for (pageId,page) in self.storage.pages(str(key1) + str(1)):
+                if(len(blocksR[ind]) < self.storage.bufferPool.numPages()-2):
+                    blocksR[ind].append((pageId,page))
+                else:
+                    ind += 1
+                    blocksR.append([])
+                    blocksR[ind].append((pageId,page))
+            ind = 0
+            for block in blocksL:
+                self.accessPageBlock(bufPool,block)
+                for tup in block:
+                    for lTuple in tup[1]:
+                        joinExprEnv = self.loadSchema(self.lhsSchema, lTuple)
+                        #for block1 in blocksR:
+                        block1 = blocksR[ind]
+                        self.accessPageBlock(bufPool,block1)
+                        for tup1 in block1:
+                            for rTuple in tup1[1]:
+                                joinExprEnv.update(self.loadSchema(self.rhsSchema, rTuple))
+                                    #schema.project(e1, projectedSchema)
+                                unpack1 = self.lhsSchema.unpack(lTuple)
+                                unpack2 = self.rhsSchema.unpack(rTuple)
+                                    #if self.lhsKeySchema.project(unpack1,self.lhsKeySchema) == self.rhsKeySchema.project(unpack2,self.rhsKeySchema):#eval(self.lhsKeySchema,globals(),self.rhsKeySchema):#eval(self.joinExpr, globals(), joinExprEnv):
+                                if unpack1 == unpack2:
+                                    #print(unpack1)
+                                    #print(unpack2)
+                                    #print(count)
+                                    count += 1
+                                    outputTuple = self.joinSchema.instantiate(*[joinExprEnv[f] for f in self.joinSchema.fields])
+                                    self.emitOutputTuple(self.joinSchema.pack(outputTuple))
+                        self.accessPageBlock2(bufPool,block1)
+                        if self.outputPages:
+                            self.outputPages = [self.outputPages[-1]]
+                self.accessPageBlock2(bufPool,block)
+                ind +=1
 
+    return self.storage.pages(self.relationId())
+
+
+
+    #for (pageId,page) in iter(self.lhsPlan):
+    #    if(len(blocksL[ind]) < self.storage.bufferPool.numPages()-2):
+    #        blocksL[ind].append((pageId,page))
+#        else:
+#          ind += 1
+#            blocksL.append([])
+#            blocksL[ind].append((pageId,page))
+#    for block in blocksL:
+#        self.accessPageBlock(bufPool,block)
+#        for tup in block:
+#            for lTuple in tup[1]:
+#                partKey = eval(self.lhsHashFn,globals(),self.loadSchema(self.lhsSchema,lTuple))
+#                self.storage.createRelation(str(partKey),self.lhsSchema)
+#                self.storage.insertTuple(str(partKey),lTuple)
+#                keysL[partKey] = 0
+#    ind = 0
+#    for (pageId,page) in iter(self.rhsPlan):
+#        if(len(blocksR[ind]) < self.storage.bufferPool.numPages()-2):
+#            blocksR[ind].append((pageId,page))
+#        else:
+#            ind += 1
+#            blocksR.append([])
+#            blocksR[ind].append((pageId,page))
+#    for block in blocksR:
+#        self.accessPageBlock(bufPool,block)
+#        for tup in block:
+#            for rTuple in tup[1]:
+#                partKey = eval(self.rhsHashFn,globals(),self.loadSchema(self.rhsSchema,rTuple))
+#                self.storage.createRelation(str(partKey),self.rhsSchema)
+#                self.storage.insertTuple(str(partKey),rTuple)
+#                keysR[partKey] = 1
+#    for key1 in keysL:
+#        for key2 in keysR:
+#            if(key1 == key2):
+#                for (pageId,page) in self.storage.pages(key1):
+#                    for tup in page:
+#                        joinExprEnv = self.loadSchema(self.lhsSchema, lTuple)
+#                    for (rpageId,rhsPage) in iter(self.rhsPlan):
+#                    for rTuple in rhsPage:
+#                        # Load the RHS tuple fields.
+#                        joinExprEnv.update(self.loadSchema(self.rhsSchema, rTuple))
+#                        #Evaluate the join predicate, and output if we have a match.
+#                        #print(globals())
+#                        if eval(self.joinExpr, globals(), joinExprEnv):
+#                            outputTuple = self.joinSchema.instantiate(*[joinExprEnv[f] for f in self.joinSchema.fields])
+#                            self.emitOutputTuple(self.joinSchema.pack(outputTuple))
+#                # No need to track anything but the last output page when in batch mode.
+#                if self.outputPages:
+#                    self.outputPages = [self.outputPages[-1]]
+#        self.accessPageBlock2(bufPool,block)
   # Plan and statistics information
 
   # Returns a single line description of the operator.

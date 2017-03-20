@@ -107,6 +107,7 @@ class GroupBy(Operator):
         self.storage.removeRelation(key)
         self.storage.createRelation(key,self.schema())
         newTup = self.schema().pack(tuple(relLst))
+        #print(self.schema().unpack(newTup))
         self.storage.insertTuple(key,newTup)
     for key in hshKeys:
         for (pageId,page) in self.storage.pages(key):
@@ -115,8 +116,18 @@ class GroupBy(Operator):
                 unpackedTuple = self.schema().unpack(tup)
                 for i in range(len(self.aggExprs)):
                     if(unpackedTuple[i+1]== absLst[i]):
+                        #print(str(absLst[i]) + " " + str(unpackedTuple.age))
+                        #print(want)
+                        #unpackedTuple = self.schema().unpack(tup)
+                        #intup = (unpackedTuple)
+                        #print(unpackedTuple)
                         groupByExprEnv = self.loadSchema(self.schema(), tup)
+                        #print(groupByExprEnv)
+                        #print(globals())
+                        #print(self.groupByExpr)
+                        #if eval(self.aggExprs, globals(), groupByExprEnv):
                         outputTuple = self.outputSchema.instantiate(*[groupByExprEnv[f] for f in self.outputSchema.fields])
+                        #print(outputTuple)
                         self.emitOutputTuple(self.outputSchema.pack(outputTuple))
             if self.outputPages:
                 self.outputPages = [self.outputPages[-1]]
