@@ -3,7 +3,10 @@ import json, io, os, os.path, pickle
 from Catalog.Schema             import DBSchema
 from Catalog.Identifiers        import FileId
 from Storage.File               import StorageFile
+import sys
+sys.path.insert(0, './Storage/Index/')
 from Storage.Index.IndexManager import IndexManager
+from IndexManager import IndexManager
 
 class FileManager:
   """

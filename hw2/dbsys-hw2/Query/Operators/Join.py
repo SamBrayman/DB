@@ -48,7 +48,7 @@ class Join(Operator):
                        self.joinMethod, \
                        self.lhsSchema, self.rhsSchema ] \
                        + methodParams
-
+    #print(requireAllValid)
     if any(map(lambda x: x is None, requireAllValid)):
       raise ValueError("Incomplete join specification, missing join operator parameter")
 

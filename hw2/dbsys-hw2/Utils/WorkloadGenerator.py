@@ -1,4 +1,4 @@
-import io, math, os, os.path, random, shutil, time, timeit
+import io, math, os, os.path, random, shutil, time, timeit,sys
 
 from Catalog.Schema        import DBSchema
 from Storage.StorageEngine import StorageEngine
@@ -259,34 +259,142 @@ class WorkloadGenerator:
     print("Execution time: " + str(end - start))
 
   def query1(self,db,relations,method):
-      start = time.time()
-      #raise NotImplementedError
-      print("query1")
-      end = time.time()
-      print("Execution time: " + str(end - start))
+      if(method == 'block-nested-loops'):
+        start = time.time()
+        #raise NotImplementedError
+        #print(self.schemas)
+
+        #SELECT 1
+        query1 = db.query().fromTable('partsupp').where("PS_AVAILQTY == 1")
+
+        #JOIN 1
+        query1 = query1.join(db.query().fromTable('supplier'),\
+        rhsSchema=self.schemas['supplier'],\
+        method=method, expr='PS_SUPPKEY == S_SUPPKEY')
+
+        #JOIN 2
+        query1 = query1.join(db.query().fromTable('part'),\
+        rhsSchema=self.schemas['part'],\
+        method=method, expr='PS_PARTKEY == P_PARTKEY')
+
+        #SELECT 2
+        query2 = db.query().fromTable('partsupp').where("PS_SUPPLYCOST < 5")
+
+        #JOIN 1
+        query2 = query2.join(db.query().fromTable('supplier'),\
+        rhsSchema=self.schemas['supplier'],\
+        method=method, expr='PS_SUPPKEY == S_SUPPKEY')
+
+        #JOIN 2
+        query2 = query2.join(db.query().fromTable('part'),\
+        rhsSchema=self.schemas['part'],\
+        method=method, expr='PS_PARTKEY == P_PARTKEY')
+
+        #UNION
+        query3 = query1.union(query2).finalize()
+
+        end = time.time()
+        print("query1 BNLJ")
+        print("Execution time: " + str(end - start))
+      else:
+        start = time.time()
+        #raise NotImplementedError
+        #print(self.schemas)
+
+        #SELECT 1
+        query1 = db.query().fromTable('partsupp').where("PS_AVAILQTY == 1")
+
+        #JOIN 1
+        keySchema  = DBSchema('suppkey1',  [('PS_SUPPKEY', 'int')])
+        keySchema2 = DBSchema('suppkey2', [('S_SUPPKEY', 'int')])
+        query1 = query1.join(db.query().fromTable('supplier'),\
+        rhsSchema=self.schemas['supplier'],\
+        method=method, expr='PS_SUPPKEY == S_SUPPKEY',
+        lhsHashFn='hash(id) % 4',  lhsKeySchema=keySchema, \
+          rhsHashFn='hash(id2) % 4', rhsKeySchema=keySchema2)
+
+        #JOIN 2
+        keySchema  = DBSchema('partkey1',  [('PS_PARTKEY', 'int')])
+        keySchema2 = DBSchema('partkey2', [('P_PARTKEY', 'int')])
+        query1 = query1.join(db.query().fromTable('part'),\
+        rhsSchema=self.schemas['part'],\
+        method=method, expr='PS_PARTKEY == P_PARTKEY',
+        lhsHashFn='hash(id) % 4',  lhsKeySchema=keySchema, \
+          rhsHashFn='hash(id2) % 4', rhsKeySchema=keySchema2)
+
+        #SELECT 2
+        query2 = db.query().fromTable('partsupp').where("PS_SUPPLYCOST < 5")
+
+        #JOIN 2
+        keySchema  = DBSchema('suppkey1',  [('PS_SUPPKEY', 'int')])
+        keySchema2 = DBSchema('suppkey2', [('S_SUPPKEY', 'int')])
+        query2 = query2.join(db.query().fromTable('supplier'),\
+        rhsSchema=self.schemas['supplier'],\
+        method=method, expr='PS_SUPPKEY == S_SUPPKEY',
+        lhsHashFn='hash(id) % 4',  lhsKeySchema=keySchema, \
+          rhsHashFn='hash(id2) % 4', rhsKeySchema=keySchema2)
+
+        #JOIN 2
+        keySchema  = DBSchema('partkey1',  [('PS_PARTKEY', 'int')])
+        keySchema2 = DBSchema('partkey2', [('P_PARTKEY', 'int')])
+        query2 = query2.join(db.query().fromTable('part'),\
+        rhsSchema=self.schemas['part'],\
+        method=method, expr='PS_PARTKEY == P_PARTKEY',
+        lhsHashFn='hash(id) % 4',  lhsKeySchema=keySchema, \
+          rhsHashFn='hash(id2) % 4', rhsKeySchema=keySchema2)
+
+        #UNION
+        query3 = query1.union(query2).finalize()
+
+        end = time.time()
+        print("query1 HASH")
+        print("Execution time: " + str(end - start))
+
+
 
 
   def query2(self,db,relations,method):
-      start = time.time()
-      #raise NotImplementedError
-      print("query2")
-      end = time.time()
-      print("Execution time: " + str(end - start))
+      if(method == 'block-nested-loops'):
+        start = time.time()
+        #raise NotImplementedError
+        print("query2 BNLJ")
+        end = time.time()
+        print("Execution time: " + str(end - start))
+      else:
+        start = time.time()
+        #raise NotImplementedError
+        print("query2 HASH")
+        end = time.time()
+        print("Execution time: " + str(end - start))
 
 
   def query3(self,db,relations,method):
-      start = time.time()
-      #raise NotImplementedError
-      print("query3")
-      end = time.time()
-      print("Execution time: " + str(end - start))
+      if(method == 'block-nested-loops'):
+        start = time.time()
+        #raise NotImplementedError
+        print("query3 BNLJ")
+        end = time.time()
+        print("Execution time: " + str(end - start))
+      else:
+        start = time.time()
+        #raise NotImplementedError
+        print("query3 HASH")
+        end = time.time()
+        print("Execution time: " + str(end - start))
 
   def query4(self,db,relations,method):
-      start = time.time()
-      #raise NotImplementedError
-      print("query4")
-      end = time.time()
-      print("Execution time: " + str(end - start))
+      if(method == 'block-nested-loops'):
+        start = time.time()
+        #raise NotImplementedError
+        print("query4 BNLJ")
+        end = time.time()
+        print("Execution time: " + str(end - start))
+      else:
+        start = time.time()
+        #raise NotImplementedError
+        print("query4 HASH")
+        end = time.time()
+        print("Execution time: " + str(end - start))
 
   # Dispatch a workload mode.
   def runOperations(self, db, mode):
@@ -327,9 +435,9 @@ class WorkloadGenerator:
   def runWorkload(self, datadir, scaleFactor, pageSize, workloadMode):
     db = Database(pageSize=pageSize)
     self.createRelations(db)
-    print(time.time())
+    #print(time.time())
     self.loadDataset(db, datadir, scaleFactor)
-    printtime.time()
+    #print(time.time())
     self.runOperations(db, workloadMode)
     self.runOperations(db, workloadMode + 1)
     self.runOperations(db, workloadMode + 2)

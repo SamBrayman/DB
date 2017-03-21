@@ -1,6 +1,7 @@
 import ast
 import io
 import Utils.unparse as unparse
+import unparse
 
 # Extract information from an eval'able expression
 class ExpressionInfo(ast.NodeVisitor):
