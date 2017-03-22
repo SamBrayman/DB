@@ -32,6 +32,8 @@ class GroupBy(Operator):
     if not self.aggExprs:
       raise ValueError("Group-by needs at least one aggregate expression")
 
+    #print(len(self.aggExprs))
+    #print(len(self.aggSchema.fields))
     if len(self.aggExprs) != len(self.aggSchema.fields):
       raise ValueError("Invalid aggregate fields: schema mismatch")
 
@@ -89,23 +91,38 @@ class GroupBy(Operator):
         groupValue = (self.groupExpr(unpackedTuple),)
         partKey = self.groupHashFn(groupValue)
         self.storage.createRelation(str(partKey),self.outputSchema)
+        #print(partKey)
+        #print(unpackedTuple)
+        #print(self.outputSchema.fields)
+        #print(self.outputSchema.unpack(inputTuple))
         lst = []
         for i in range(len(self.aggExprs)):
             absLst[i] = self.aggExprs[i][1](absLst[i],unpackedTuple)
             lst.append(self.aggExprs[i][1](self.aggExprs[i][0],unpackedTuple))
+        #print(partKey)
+        #print(inputTuple)
+        #print(self.outputSchema.project(unpackedTuple))
         self.storage.insertTuple(str(partKey),inputTuple)
         hshKeys[str(partKey)] = 0#tuple(lst)
     for key in hshKeys:
         relLst = []
-        relLst.append(int(key))
+        #relLst.append(int(str(key)))
+        #print(key)
+        for i in range(len(self.groupSchema.fields)):
+            relLst.append(int(key))
         for i in range(len(self.aggExprs)):
             relLst.append(self.aggExprs[i][0])
         for tup in self.storage.tuples(key):
             unpackedTuple = self.subSchema.unpack(tup)
+            #print(unpackedTuple)
             for i in range(len(self.aggExprs)):
                 relLst[i+1] = self.aggExprs[i][1](relLst[i+1],unpackedTuple)
+                #print(self.aggExprs[i][1]())
         self.storage.removeRelation(key)
         self.storage.createRelation(key,self.schema())
+        #print(unpackedTuple)
+        #print(relLst)
+        #print(self.schema().fields)
         newTup = self.schema().pack(tuple(relLst))
         #print(self.schema().unpack(newTup))
         self.storage.insertTuple(key,newTup)
@@ -114,6 +131,9 @@ class GroupBy(Operator):
             for tup in page:
                 want = False
                 unpackedTuple = self.schema().unpack(tup)
+                #unpackedTuple2 = self.subSchema.unpack(tup)
+                #for i in range(len(self.aggExprs)):
+                    #absLst[i] = self.aggExprs[i][1](absLst[i],unpackedTuple)
                 for i in range(len(self.aggExprs)):
                     if(unpackedTuple[i+1]== absLst[i]):
                         #print(str(absLst[i]) + " " + str(unpackedTuple.age))

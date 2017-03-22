@@ -63,11 +63,11 @@ class Sort(Operator):
 
   # Page-at-a-time operator processing
   def processInputPage(self, pageId, page):
-    #raise NotImplementedError
+    raise NotImplementedError
 
   # Set-at-a-time operator processing
   def processAllPages(self):
-    #raise NotImplementedError
+    raise NotImplementedError
 
 
   # Plan and statistics information

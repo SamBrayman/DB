@@ -277,20 +277,21 @@ class PlanBuilder:
   ### Group by aggregate query
   ### SELECT id, max(age) FROM Employee GROUP BY id
   >>> aggMinMaxSchema = DBSchema('minmax', [('minAge', 'int'), ('maxAge','int')])
+  >>> keySchema  = DBSchema('employeeKey',  [('id', 'int')])
   >>> query6 = db.query().fromTable('employee').groupBy( \
-          groupSchema=keySchema, \
-          aggSchema=aggMinMaxSchema, \
-          groupExpr=(lambda e: e.id%2), \
-          aggExprs=[(sys.maxsize, lambda acc, e: min(acc, e.age), lambda x: x), \
-                    (0, lambda acc, e: max(acc, e.age), lambda x: x)], \
-          groupHashFn=(lambda gbVal: hash(gbVal[0]) % 2) \
-        ).finalize()
+                groupSchema=keySchema, \
+                aggSchema=aggMinMaxSchema, \
+                groupExpr=(lambda e: e.id % 2), \
+                aggExprs=[(sys.maxsize, lambda acc, e: min(acc, e.age), lambda x: x), \
+                  (0, lambda acc, e: max(acc, e.age), lambda x: x)], \
+                groupHashFn=(lambda gbVal: hash(gbVal[0]) % 2) \
+              ).finalize()
 
   >>> print(query6.explain()) # doctest: +ELLIPSIS
   GroupBy[...,cost=...](groupSchema=employeeKey[(id,int)], aggSchema=minmax[(minAge,int),(maxAge,int)])
     TableScan[...,cost=...](employee)
 
-  >>> q6results = [query6.schema().unpack(tup) for page in db.processQuery(query6) for tup in page[1]]
+  >>> q6results = [query6.schema().unpack(tup) for page in db.processQuery(query6) for tup in page[1] ]
   >>> sorted([(tup.id, tup.minAge, tup.maxAge) for tup in q6results]) # doctest:+ELLIPSIS
   [(0, 20, 20), (1, 22, 22), ..., (18, 56, 56), (19, 58, 58)]
 
