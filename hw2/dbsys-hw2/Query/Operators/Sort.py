@@ -55,7 +55,7 @@ class Sort(Operator):
             except StopIteration:
                 self.inputFinished = True
         return self.outputPage()
-    
+
     else:
         return next(self.outputIterator)
 

@@ -4,7 +4,10 @@ from Query.Plan import Plan
 from Query.Operators.Join import Join
 from Query.Operators.Project import Project
 from Query.Operators.Select import Select
-from Utils.ExpressionInfo import ExpressionInfo
+import sys
+sys.path.insert(0, './Utils/')
+#from Utils.ExpressionInfo
+from ExpressionInfo import ExpressionInfo
 
 # Helper for removing items from a tuple, while preserving order.
 def tuple_without(t, x):

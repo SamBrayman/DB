@@ -1,4 +1,4 @@
-import io, math, os, os.path, random, shutil, time, timeit
+import io, math, os, os.path, random, shutil, time, timeit,sys
 
 from Catalog.Schema        import DBSchema
 from Storage.StorageEngine import StorageEngine
@@ -39,7 +39,7 @@ class WorkloadGenerator:
   >>> db.close()
   >>> shutil.rmtree(db.fileManager().dataDir, ignore_errors=True)
   >>> del db
-  
+
   >>> wg.runWorkload('test/datasets/tpch-tiny', 1.0, 4096, 1) # doctest:+ELLIPSIS
   Tuples: 736
   Throughput: ...
@@ -84,7 +84,7 @@ class WorkloadGenerator:
                        ('P_RETAILPRICE', 'double'),
                        ('P_COMMENT'    , 'char(23)') ]
                ,      "issssisds"),
-        
+
         ('supplier', [ ('S_SUPPKEY'   , 'int'),
                        ('S_NAME'      , 'char(25)'),
                        ('S_ADDRESS'   , 'char(40)'),
@@ -93,14 +93,14 @@ class WorkloadGenerator:
                        ('S_ACCTBAL'   , 'double'),
                        ('S_COMMENT'   , 'char(101)') ]
                    ,  "issisds"),
-        
+
         ('partsupp', [ ('PS_PARTKEY'    , 'int'),
                        ('PS_SUPPKEY'    , 'int'),
                        ('PS_AVAILQTY'   , 'int'),
                        ('PS_SUPPLYCOST' , 'double'),
                        ('PS_COMMENT'    , 'char(199)') ]
                    , "iiids"),
-        
+
         ('customer', [ ('C_CUSTKEY'    , 'int'),
                        ('C_NAME'       , 'char(25)'),
                        ('C_ADDRESS'    , 'char(40)'),
@@ -110,7 +110,7 @@ class WorkloadGenerator:
                        ('C_MKTSEGMENT' , 'char(10)'),
                        ('C_COMMENT'    , 'char(117)') ]
                    , "issisdss"),
-        
+
         ('orders',   [ ('O_ORDERKEY'      , 'int'),
                        ('O_CUSTKEY'       , 'int'),
                        ('O_ORDERSTATUS'   , 'char(1)'),
@@ -121,7 +121,7 @@ class WorkloadGenerator:
                        ('O_SHIPPRIORITY'  , 'int'),
                        ('O_COMMENT'       , 'char(79)') ]
                  ,   "iisdtssis"),
-        
+
         ('lineitem', [ ('L_ORDERKEY'      , 'int'),
                        ('L_PARTKEY'       , 'int'),
                        ('L_SUPPKEY'       , 'int'),
@@ -139,13 +139,13 @@ class WorkloadGenerator:
                        ('L_SHIPMODE'      , 'char(10)'),
                        ('L_COMMENT'       , 'char(44)') ]
                    , "iiiiddddsstttsss"),
-        
+
         ('nation',   [ ('N_NATIONKEY'  , 'int'),
                        ('N_NAME'       , 'char(25)'),
                        ('N_REGIONKEY'  , 'int'),
                        ('N_COMMENT'    , 'char(152)') ]
                  ,   "isis"),
-        
+
         ('region',   [ ('R_REGIONKEY' , 'int'),
                        ('R_NAME'      , 'char(25)'),
                        ('R_COMMENT'   , 'char(152)') ]
@@ -212,18 +212,18 @@ class WorkloadGenerator:
   def scanRelations(self, db, relations):
     start = time.time()
     tuplesRead = 0
-    
+
     # Sequentially read through relations
     for rel in relations:
       for t in db.storageEngine().tuples(rel):
         tuplesRead += 1
-    
+
     end = time.time()
     print("Tuples: " + str(tuplesRead))
     print("Throughput: " + str(tuplesRead / (end - start)))
     print("Execution time: " + str(end - start))
 
-  # Randomized access for 1/fraction read operations on the 
+  # Randomized access for 1/fraction read operations on the
   # stored tuples for the given relations.
   def randomizedOperations(self, db, relations, fraction):
 
@@ -258,6 +258,546 @@ class WorkloadGenerator:
     print("Throughput: " + str(tuplesRead / (end - start)))
     print("Execution time: " + str(end - start))
 
+  def query1(self,db,relations,method):
+      if(method == 'block-nested-loops'):
+        start = time.time()
+        #raise NotImplementedError
+        #print(self.schemas)
+
+        #SELECT 1
+        query1 = db.query().fromTable('partsupp').where("PS_AVAILQTY == 1")
+
+        #JOIN 1
+        query1 = query1.join(db.query().fromTable('supplier'),\
+        rhsSchema=self.schemas['supplier'],\
+        method=method, expr='PS_SUPPKEY == S_SUPPKEY')
+
+        #JOIN 2
+        query1 = query1.join(db.query().fromTable('part'),\
+        rhsSchema=self.schemas['part'],\
+        method=method, expr='PS_PARTKEY == P_PARTKEY')
+
+        #SELECT 2
+        query2 = db.query().fromTable('partsupp').where("PS_SUPPLYCOST < 5")
+
+        #JOIN 1
+        query2 = query2.join(db.query().fromTable('supplier'),\
+        rhsSchema=self.schemas['supplier'],\
+        method=method, expr='PS_SUPPKEY == S_SUPPKEY')
+
+        #JOIN 2
+        query2 = query2.join(db.query().fromTable('part'),\
+        rhsSchema=self.schemas['part'],\
+        method=method, expr='PS_PARTKEY == P_PARTKEY')
+
+        #UNION
+        query3 = query1.union(query2).finalize()
+
+        end = time.time()
+        print("query1 BNLJ")
+        print("Execution time: " + str(end - start))
+      else:
+        start = time.time()
+        #raise NotImplementedError
+        #print(self.schemas)
+
+        #SELECT 1
+        query1 = db.query().fromTable('partsupp').where("PS_AVAILQTY == 1")
+
+        #JOIN 1
+        keySchema  = DBSchema('suppkey1',  [('PS_SUPPKEY', 'int')])
+        keySchema2 = DBSchema('suppkey2', [('S_SUPPKEY', 'int')])
+        query1 = query1.join(db.query().fromTable('supplier'),\
+        rhsSchema=self.schemas['supplier'],\
+        method=method, expr='PS_SUPPKEY == S_SUPPKEY',
+        lhsHashFn='hash(id) % 4',  lhsKeySchema=keySchema, \
+          rhsHashFn='hash(id2) % 4', rhsKeySchema=keySchema2)
+
+        #JOIN 2
+        keySchema  = DBSchema('partkey1',  [('PS_PARTKEY', 'int')])
+        keySchema2 = DBSchema('partkey2', [('P_PARTKEY', 'int')])
+        query1 = query1.join(db.query().fromTable('part'),\
+        rhsSchema=self.schemas['part'],\
+        method=method, expr='PS_PARTKEY == P_PARTKEY',
+        lhsHashFn='hash(id) % 4',  lhsKeySchema=keySchema, \
+          rhsHashFn='hash(id2) % 4', rhsKeySchema=keySchema2)
+
+        #SELECT 2
+        query2 = db.query().fromTable('partsupp').where("PS_SUPPLYCOST < 5")
+
+        #JOIN 2
+        keySchema  = DBSchema('suppkey1',  [('PS_SUPPKEY', 'int')])
+        keySchema2 = DBSchema('suppkey2', [('S_SUPPKEY', 'int')])
+        query2 = query2.join(db.query().fromTable('supplier'),\
+        rhsSchema=self.schemas['supplier'],\
+        method=method, expr='PS_SUPPKEY == S_SUPPKEY',
+        lhsHashFn='hash(id) % 4',  lhsKeySchema=keySchema, \
+          rhsHashFn='hash(id2) % 4', rhsKeySchema=keySchema2)
+
+        #JOIN 2
+        keySchema  = DBSchema('partkey1',  [('PS_PARTKEY', 'int')])
+        keySchema2 = DBSchema('partkey2', [('P_PARTKEY', 'int')])
+        query2 = query2.join(db.query().fromTable('part'),\
+        rhsSchema=self.schemas['part'],\
+        method=method, expr='PS_PARTKEY == P_PARTKEY',
+        lhsHashFn='hash(id) % 4',  lhsKeySchema=keySchema, \
+          rhsHashFn='hash(id2) % 4', rhsKeySchema=keySchema2)
+
+        #UNION
+        query3 = query1.union(query2).finalize()
+
+        end = time.time()
+        print("query1 HASH")
+        print("Execution time: " + str(end - start))
+
+
+
+
+  def query2(self,db,relations,method):
+      if(method == 'block-nested-loops'):
+        start = time.time()
+        #raise NotImplementedError
+
+        #SELECT 1
+        query1 = db.query().fromTable('lineitem').where("L_RETURNFLAG == 'R' ")
+
+        #JOIN 1
+        query1 = query1.join(db.query().fromTable('part'),\
+        rhsSchema=self.schemas['part'],\
+        method=method, expr='L_PARTKEY == P_PARTKEY')
+
+        #query1 = query1.select({'ID':('P_PARTKEY'),'P_NAME': ('P_NAME', 'char(55)')})
+
+        #GROUP BY
+        nameSchema = DBSchema('id', [('id', 'int')])
+        nameCountSchema = DBSchema('namecount',[('name1','char(55)')])#,[('count','int')])
+        #print(len(nameCountSchema.fields))
+        #print(len([(1,2,3)]))
+        query1 = query1.groupBy( \
+          groupSchema=nameSchema, \
+          aggSchema=nameCountSchema, \
+          groupExpr=(lambda e: e.P_NAME), \
+          aggExprs=[("part", lambda acc, e: e.P_NAME, lambda x: x)] , \
+          groupHashFn=(lambda gbVal: hash(gbVal) % 1000000))
+
+        #SELECT 2
+        query1 = query1.select({'P_NAME': ('P_NAME', 'char(55)')}).finalize()
+
+        #COUNT
+        for page in db.processQuery(query1):
+            for tup in page[1]:
+                print(tup)
+        results = [nameSchema.unpack(tup) for page in db.processQuery(query1) for tup in page[1] ]
+
+        dict1 = {}
+        for tup in results:
+            if(tup[0] in dict1):
+                dict1[tup[0]] = dict1[tup[0]] + 1
+            else:
+                dict1[tup[0]] = 1
+
+        print("query2 BNLJ")
+        end = time.time()
+        print("Execution time: " + str(end - start))
+      else:
+        start = time.time()
+        #raise NotImplementedError
+
+        #SELECT 1
+        query1 = db.query().fromTable('lineitem').where("L_RETURNFLAG == 'R' ")
+
+        #JOIN 1
+        keySchema  = DBSchema('partkey1',  [('L_PARTKEY', 'int')])
+        keySchema2 = DBSchema('partkey2', [('P_PARTKEY', 'int')])
+        query1 = query1.join(db.query().fromTable('part'),\
+        rhsSchema=self.schemas['part'],\
+        method=method, expr='L_PARTKEY == P_PARTKEY',
+        lhsHashFn='hash(L_PARTKEY) % 4',  lhsKeySchema=keySchema, \
+          rhsHashFn='hash(P_PARTKEY) % 4', rhsKeySchema=keySchema2)
+
+        #GROUP BY
+        # hash by name
+        # relation by name
+        #print out by name
+        nameSchema = DBSchema('id', [('id', 'int')])
+        nameCountSchema = DBSchema('namecount',[('name2','char(55)')])#,[('count','int')])
+        query1 = query1.groupBy( \
+          groupSchema=nameSchema, \
+          aggSchema=nameCountSchema, \
+          groupExpr=(lambda e: e.P_NAME), \
+          aggExprs=[("part", lambda acc, e: e.P_NAME, lambda x: x)], \
+          groupHashFn=(lambda gbVal: hash(gbVal) % 10000000) \
+        )
+
+        #SELECT 2
+        query1 = query1.select({'P_NAME': ('P_NAME', 'char(55)')}).finalize()
+
+        #COUNT
+        #for page in db.processQuery(query1):
+        #    for tup in page[1]:
+        #        print(tup)
+        results = [nameSchema.unpack(tup) for page in db.processQuery(query1) for tup in page[1] ]
+        dict1 = {}
+        for tup in results:
+            if(tup[0] in dict1):
+                dict1[tup[0]] = dict1[tup[0]] + 1
+            else:
+                dict1[tup[0]] = 1
+
+
+        print("query2 HASH")
+        end = time.time()
+        print("Execution time: " + str(end - start))
+
+
+  def query3(self,db,relations,method):
+      if(method == 'block-nested-loops'):
+        start = time.time()
+        #raise NotImplementedError
+
+        #JOIN 1
+        query1 = db.query().fromTable('lineitem').join(db.query().fromTable('orders'),\
+        rhsSchema=self.schemas['orders'],\
+        method=method, expr='L_ORDERKEY == O_ORDERKEY')
+
+        #JOIN 2
+        query1 = query1.join(db.query().fromTable('part'),\
+        rhsSchema=self.schemas['part'],\
+        method=method, expr='L_PARTKEY == P_PARTKEY')
+
+        #JOIN 3
+        query1 = query1.join(db.query().fromTable('customer'),\
+        rhsSchema=self.schemas['customer'],\
+        method=method, expr='O_CUSTKEY == C_CUSTKEY')
+
+        #JOIN 4
+        query1 = query1.join(db.query().fromTable('nation'),\
+        rhsSchema=self.schemas['nation'],\
+        method=method, expr='C_NATIONKEY == N_NATIONKEY')
+
+        #GROUPY BY 1
+        nameSchema = DBSchema('id', [('id', 'int')])
+        nameCountSchema = DBSchema('namecount',[('name2','char(55)')])#,[('count','int')])
+        query1 = query1.groupBy( \
+          groupSchema=nameSchema, \
+          aggSchema=nameCountSchema, \
+          groupExpr=(lambda e: e.P_NAME), \
+          aggExprs=[("part", lambda acc, e: e.P_NAME, lambda x: x)], \
+          groupHashFn=(lambda gbVal: hash(gbVal) % 10000000) \
+        )
+
+        #GROUP BY 2
+        nameSchema = DBSchema('id', [('id', 'int')])
+        nameCountSchema = DBSchema('namecount',[('name2','char(55)')])#,[('count','int')])
+        query1 = query1.groupBy( \
+          groupSchema=nameSchema, \
+          aggSchema=nameCountSchema, \
+          groupExpr=(lambda e: e.N_NAME), \
+          aggExprs=[("part", lambda acc, e: e.N_NAME, lambda x: x)], \
+          groupHashFn=(lambda gbVal: hash(gbVal) % 10000000) \
+        )
+
+        #SELECT 1
+        query1 = query1.select({'nation': ('N_NAME', 'char(55)')})
+        query1 = query1.select({'part':('P_NAME','char(55)')})#.finalize()
+
+        #GROUP BY 3
+        nameSchema = DBSchema('id', [('id', 'int')])
+        nameCountSchema = DBSchema('namecount',[('name2','char(55)')])#,[('count','int')])
+        query1 = query1.groupBy( \
+          groupSchema=nameSchema, \
+          aggSchema=nameCountSchema, \
+          groupExpr=(lambda e: e.N_NAME), \
+          aggExprs=[("part", lambda acc, e: e.N_NAME, lambda x: x)], \
+          groupHashFn=(lambda gbVal: hash(gbVal) % 10000000) \
+        )
+
+        #SELECT 2
+        query1 = query1.select({'nation': ('N_NAME', 'char(55)')}).finalize()
+
+        #SUM
+        #'''
+        results = [nameSchema.unpack(tup) for page in db.processQuery(query1) for tup in page[1] ]
+        dict1 = {}
+        for tup in results:
+            if(tup[0] in dict1):
+                dict1[tup[0]] = dict1[tup[0]] + 1
+            else:
+                dict1[tup[0]] = 1
+        #'''
+
+        print("query3 BNLJ")
+        end = time.time()
+        print("Execution time: " + str(end - start))
+      else:
+        start = time.time()
+        #raise NotImplementedError
+
+        #JOIN 1
+        keySchema  = DBSchema('orderkey1',  [('L_ORDERKEY', 'int')])
+        keySchema2 = DBSchema('orderkey2', [('O_ORDERKEY', 'int')])
+        query1 = db.query().fromTable('lineitem').join(db.query().fromTable('orders'),\
+        rhsSchema=self.schemas['orders'],\
+        method=method, expr='L_ORDERKEY == O_ORDERKEY',
+        lhsHashFn='hash(L_ORDERKEY) % 4',  lhsKeySchema=keySchema, \
+          rhsHashFn='hash(O_ORDERKEY) % 4', rhsKeySchema=keySchema2)
+
+        #JOIN 2
+        keySchema  = DBSchema('partkey1',  [('L_PARTKEY', 'int')])
+        keySchema2 = DBSchema('partkey2', [('P_PARTKEY', 'int')])
+        query1 = query1.join(db.query().fromTable('part'),\
+        rhsSchema=self.schemas['part'],\
+        method=method, expr='L_PARTKEY == P_PARTKEY',
+        lhsHashFn='hash(L_PARTKEY) % 4',  lhsKeySchema=keySchema, \
+          rhsHashFn='hash(P_PARTKEY) % 4', rhsKeySchema=keySchema2)
+
+        #JOIN 3
+        keySchema  = DBSchema('custkey1',  [('O_CUSTKEY', 'int')])
+        keySchema2 = DBSchema('custkey2', [('C_CUSTKEY', 'int')])
+        query1 = query1.join(db.query().fromTable('customer'),\
+        rhsSchema=self.schemas['customer'],\
+        method=method, expr='O_CUSTKEY == C_CUSTKEY',
+        lhsHashFn='hash(O_CUSTKEY) % 4',  lhsKeySchema=keySchema, \
+          rhsHashFn='hash(C_CUSTKEY) % 4', rhsKeySchema=keySchema2)
+
+        #JOIN 4
+        keySchema  = DBSchema('nationkey1',  [('C_NATIONKEY', 'int')])
+        keySchema2 = DBSchema('nationkey2', [('N_NATIONKEY', 'int')])
+        query1 = query1.join(db.query().fromTable('nation'),\
+        rhsSchema=self.schemas['nation'],\
+        method=method, expr='C_NATIONKEY == N_NATIONKEY',
+        lhsHashFn='hash(C_NATIONKEY) % 4',  lhsKeySchema=keySchema, \
+          rhsHashFn='hash(N_NATIONKEY) % 4', rhsKeySchema=keySchema2)
+
+        #GROUPY BY 1
+        nameSchema = DBSchema('id', [('id', 'int')])
+        nameCountSchema = DBSchema('namecount',[('name2','char(55)')])#,[('count','int')])
+        query1 = query1.groupBy( \
+          groupSchema=nameSchema, \
+          aggSchema=nameCountSchema, \
+          groupExpr=(lambda e: e.P_NAME), \
+          aggExprs=[("part", lambda acc, e: e.P_NAME, lambda x: x)], \
+          groupHashFn=(lambda gbVal: hash(gbVal) % 10000000) \
+        )
+
+        #GROUP BY 2
+        nameSchema = DBSchema('id', [('id', 'int')])
+        nameCountSchema = DBSchema('namecount',[('name2','char(55)')])#,[('count','int')])
+        query1 = query1.groupBy( \
+          groupSchema=nameSchema, \
+          aggSchema=nameCountSchema, \
+          groupExpr=(lambda e: e.N_NAME), \
+          aggExprs=[("part", lambda acc, e: e.N_NAME, lambda x: x)], \
+          groupHashFn=(lambda gbVal: hash(gbVal) % 10000000) \
+        )
+
+        #SELECT 1
+        query1 = query1.select({'nation': ('N_NAME', 'char(55)')})
+        query1 = query1.select({'part':('P_NAME','char(55)')})#.finalize()
+
+        #GROUP BY 3
+        nameSchema = DBSchema('id', [('id', 'int')])
+        nameCountSchema = DBSchema('namecount',[('name2','char(55)')])#,[('count','int')])
+        query1 = query1.groupBy( \
+          groupSchema=nameSchema, \
+          aggSchema=nameCountSchema, \
+          groupExpr=(lambda e: e.N_NAME), \
+          aggExprs=[("part", lambda acc, e: e.N_NAME, lambda x: x)], \
+          groupHashFn=(lambda gbVal: hash(gbVal) % 10000000) \
+        )
+
+        #SELECT 2
+        query1 = query1.select({'nation': ('N_NAME', 'char(55)')}).finalize()
+
+        #SUM
+        #'''
+        results = [nameSchema.unpack(tup) for page in db.processQuery(query1) for tup in page[1] ]
+        dict1 = {}
+        for tup in results:
+            if(tup[0] in dict1):
+                dict1[tup[0]] = dict1[tup[0]] + 1
+            else:
+                dict1[tup[0]] = 1
+        #'''
+
+        print("query3 HASH")
+        end = time.time()
+        print("Execution time: " + str(end - start))
+
+  def query4(self,db,relations,method):
+      if(method == 'block-nested-loops'):
+        start = time.time()
+        #raise NotImplementedError
+
+        #JOIN 1
+        query1 = db.query().fromTable('lineitem').join(db.query().fromTable('part'),\
+        rhsSchema=self.schemas['part'],\
+        method=method, expr='L_PARTKEY == P_PARTKEY')
+
+        #JOIN 2
+        query1 = query1.join(db.query().fromTable('orders'),\
+        rhsSchema=self.schemas['orders'],\
+        method=method, expr='L_ORDERKEY == O_ORDERKEY')
+
+        #JOIN 3
+        query1 = query1.join(db.query().fromTable('customer'),\
+        rhsSchema=self.schemas['customer'],\
+        method=method, expr='O_CUSTKEY == C_CUSTKEY')
+
+        #JOIN 4
+        query1 = query1.join(db.query().fromTable('nation'),\
+        rhsSchema=self.schemas['nation'],\
+        method=method, expr='C_NATIONKEY == N_NATIONKEY')
+
+        #GROUPY BY 1
+        nameSchema = DBSchema('id', [('id', 'int')])
+        nameCountSchema = DBSchema('namecount',[('name2','char(55)')])#,[('count','int')])
+        query1 = query1.groupBy( \
+          groupSchema=nameSchema, \
+          aggSchema=nameCountSchema, \
+          groupExpr=(lambda e: e.P_NAME), \
+          aggExprs=[("part", lambda acc, e: e.P_NAME, lambda x: x)], \
+          groupHashFn=(lambda gbVal: hash(gbVal) % 10000000) \
+        )
+
+        #GROUP BY 2
+        nameSchema = DBSchema('id', [('id', 'int')])
+        nameCountSchema = DBSchema('namecount',[('name2','char(55)')])#,[('count','int')])
+        query1 = query1.groupBy( \
+          groupSchema=nameSchema, \
+          aggSchema=nameCountSchema, \
+          groupExpr=(lambda e: e.N_NAME), \
+          aggExprs=[("part", lambda acc, e: e.N_NAME, lambda x: x)], \
+          groupHashFn=(lambda gbVal: hash(gbVal) % 10000000) \
+        )
+
+        #SELECT 1
+        query1 = query1.select({'nation': ('N_NAME', 'char(55)')})
+        query1 = query1.select({'part':('P_NAME','char(55)')})#.finalize()
+
+        #GROUP BY 3
+        nameSchema = DBSchema('id', [('id', 'int')])
+        nameCountSchema = DBSchema('namecount',[('name2','char(55)')])#,[('count','int')])
+        query1 = query1.groupBy( \
+          groupSchema=nameSchema, \
+          aggSchema=nameCountSchema, \
+          groupExpr=(lambda e: e.N_NAME), \
+          aggExprs=[("part", lambda acc, e: e.N_NAME, lambda x: x)], \
+          groupHashFn=(lambda gbVal: hash(gbVal) % 10000000) \
+        )
+
+        #SELECT 2
+        query1 = query1.select({'nation': ('N_NAME', 'char(55)')}).finalize()
+
+        #SUM
+        #'''
+        results = [nameSchema.unpack(tup) for page in db.processQuery(query1) for tup in page[1] ]
+        dict1 = {}
+        for tup in results:
+            if(tup[0] in dict1):
+                dict1[tup[0]] = dict1[tup[0]] + 1
+            else:
+                dict1[tup[0]] = 1
+        #'''
+
+        print("query4 BNLJ")
+        end = time.time()
+        print("Execution time: " + str(end - start))
+      else:
+        start = time.time()
+        #raise NotImplementedError
+
+        #JOIN 1
+        keySchema  = DBSchema('partkey1',  [('L_PARTKEY', 'int')])
+        keySchema2 = DBSchema('partkey2', [('P_PARTKEY', 'int')])
+        query1 = db.query().fromTable('lineitem').join(db.query().fromTable('part'),\
+        rhsSchema=self.schemas['part'],\
+        method=method, expr='L_PARTKEY == P_PARTKEY',
+        lhsHashFn='hash(L_PARTKEY) % 4',  lhsKeySchema=keySchema, \
+          rhsHashFn='hash(P_PARTKEY) % 4', rhsKeySchema=keySchema2)
+
+        #JOIN 2
+        keySchema  = DBSchema('orderkey1',  [('L_ORDERKEY', 'int')])
+        keySchema2 = DBSchema('orderkey2', [('O_ORDERKEY', 'int')])
+        query1 = query1.join(db.query().fromTable('orders'),\
+        rhsSchema=self.schemas['orders'],\
+        method=method, expr='L_ORDERKEY == O_ORDERKEY',
+        lhsHashFn='hash(L_ORDERKEY) % 4',  lhsKeySchema=keySchema, \
+          rhsHashFn='hash(O_ORDERKEY) % 4', rhsKeySchema=keySchema2)
+
+        #JOIN 3
+        keySchema  = DBSchema('custkey1',  [('O_CUSTKEY', 'int')])
+        keySchema2 = DBSchema('custkey2', [('C_CUSTKEY', 'int')])
+        query1 = query1.join(db.query().fromTable('customer'),\
+        rhsSchema=self.schemas['customer'],\
+        method=method, expr='O_CUSTKEY == C_CUSTKEY',
+        lhsHashFn='hash(O_CUSTKEY) % 4',  lhsKeySchema=keySchema, \
+          rhsHashFn='hash(C_CUSTKEY) % 4', rhsKeySchema=keySchema2)
+
+        #JOIN 4
+        keySchema  = DBSchema('nationkey1',  [('C_NATIONKEY', 'int')])
+        keySchema2 = DBSchema('nationkey2', [('N_NATIONKEY', 'int')])
+        query1 = query1.join(db.query().fromTable('nation'),\
+        rhsSchema=self.schemas['nation'],\
+        method=method, expr='C_NATIONKEY == N_NATIONKEY',
+        lhsHashFn='hash(C_NATIONKEY) % 4',  lhsKeySchema=keySchema, \
+          rhsHashFn='hash(N_NATIONKEY) % 4', rhsKeySchema=keySchema2)
+
+        #GROUPY BY 1
+        nameSchema = DBSchema('id', [('id', 'int')])
+        nameCountSchema = DBSchema('namecount',[('name2','char(55)')])#,[('count','int')])
+        query1 = query1.groupBy( \
+          groupSchema=nameSchema, \
+          aggSchema=nameCountSchema, \
+          groupExpr=(lambda e: e.P_NAME), \
+          aggExprs=[("part", lambda acc, e: e.P_NAME, lambda x: x)], \
+          groupHashFn=(lambda gbVal: hash(gbVal) % 10000000) \
+        )
+
+        #GROUP BY 2
+        nameSchema = DBSchema('id', [('id', 'int')])
+        nameCountSchema = DBSchema('namecount',[('name2','char(55)')])#,[('count','int')])
+        query1 = query1.groupBy( \
+          groupSchema=nameSchema, \
+          aggSchema=nameCountSchema, \
+          groupExpr=(lambda e: e.N_NAME), \
+          aggExprs=[("part", lambda acc, e: e.N_NAME, lambda x: x)], \
+          groupHashFn=(lambda gbVal: hash(gbVal) % 10000000) \
+        )
+
+        #SELECT 1
+        query1 = query1.select({'nation': ('N_NAME', 'char(55)')})
+        query1 = query1.select({'part':('P_NAME','char(55)')})#.finalize()
+
+        #GROUP BY 3
+        nameSchema = DBSchema('id', [('id', 'int')])
+        nameCountSchema = DBSchema('namecount',[('name2','char(55)')])#,[('count','int')])
+        query1 = query1.groupBy( \
+          groupSchema=nameSchema, \
+          aggSchema=nameCountSchema, \
+          groupExpr=(lambda e: e.N_NAME), \
+          aggExprs=[("part", lambda acc, e: e.N_NAME, lambda x: x)], \
+          groupHashFn=(lambda gbVal: hash(gbVal) % 10000000) \
+        )
+
+        #SELECT 2
+        query1 = query1.select({'nation': ('N_NAME', 'char(55)')}).finalize()
+
+        #SUM
+        #'''
+        results = [nameSchema.unpack(tup) for page in db.processQuery(query1) for tup in page[1] ]
+        dict1 = {}
+        for tup in results:
+            if(tup[0] in dict1):
+                dict1[tup[0]] = dict1[tup[0]] + 1
+            else:
+                dict1[tup[0]] = 1
+        #'''
+
+        print("query4 HASH")
+        end = time.time()
+        print("Execution time: " + str(end - start))
+
   # Dispatch a workload mode.
   def runOperations(self, db, mode):
     if hasattr(self, 'tupleIds') and self.tupleIds:
@@ -273,6 +813,22 @@ class WorkloadGenerator:
       elif mode == 4:
         self.randomizedOperations(db, ['lineitem', 'orders'], 0.8)
 
+      elif mode == 5:
+        self.query1(db,['part','supplier','partsupp'],"block-nested-loops")
+        self.query1(db,['part','supplier','partsupp'],"hash")
+
+      elif mode == 6:
+        self.query2(db,['part','lineitem'],"block-nested-loops")
+        self.query2(db,['part','lineitem'],"hash")
+
+      elif mode == 7:
+        self.query3(db,['nation','part','lineitem','customer','orders'],"block-nested-loops")
+        self.query3(db,['nation','part','lineitem','customer','orders'],"hash")
+
+      elif mode == 8:
+        self.query4(db,['nation','part','lineitem','customer','orders'],"block-nested-loops")
+        self.query4(db,['nation','part','lineitem','customer','orders'],"hash")
+
       else:
         raise ValueError("Invalid workload mode (expected 1-4): "+str(mode))
     else:
@@ -281,8 +837,13 @@ class WorkloadGenerator:
   def runWorkload(self, datadir, scaleFactor, pageSize, workloadMode):
     db = Database(pageSize=pageSize)
     self.createRelations(db)
+    #print(time.time())
     self.loadDataset(db, datadir, scaleFactor)
+    #print(time.time())
     self.runOperations(db, workloadMode)
+    self.runOperations(db, workloadMode + 1)
+    self.runOperations(db, workloadMode + 2)
+    self.runOperations(db, workloadMode + 3)
     db.close()
     shutil.rmtree(db.fileManager().dataDir, ignore_errors=True)
     del db
