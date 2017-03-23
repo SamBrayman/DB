@@ -2,10 +2,15 @@ Sam Brayman - sbrayma1
 Michael Oluwole - moluwol1
 
 Design Choices:
+
 We didn't do the index join. We believe that everything works. Everything pases the Doctests and Unit tests.
-We ran the experiments on the smallest data set and tried to run them on the larger data sets, however,
-our programs timed out on the larger data sets.
+We ran the experiments on the smallest data set and tried to run them on the larger data sets.  When we scaled up the size of the data set our programs timed out.  We trid running them overnight on two separate computers using screens and both timed out without throwing errors, so we didn't think there was a way to avoid this.
+
+
 We have two graphs to visualise the experiment results. One shows the results for experiments that were fast. 
 The other shows the results for experiments that were slow.
-We have made an attempt at sort.
+Query1 and Query2 were very fast and needed to be plotted on a different scale.
+Query3 and Query4 took a lot longer; query3 joins lineitem with orders while query4 joins lineitem with parts.
+
+We also implemented sort.
 
