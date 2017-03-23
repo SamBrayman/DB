@@ -6,8 +6,8 @@ plt.title('Comparison of Codebase to SQLite')
 
 queries = ('1', '2', '3', '4')
 y_pos = np.arange(len(queries))
-performance = [0.004521608352661133,5.019667625427246,0,0]
-performance2 = [0.0056836605072021484,4.999634265899658,0,0]
+performance = [0.004521608352661133,5.019667625427246,7251.6041469573975,1404.3665747642517]
+performance2 = [0.0056836605072021484,4.999634265899658,7222.663188339,1398.761785244]
 performance3 =  [0.163,0.849,2.180 ,2.180 ]
 #Run Time: real 0.163 user 0.037595 sys 0.009321 Query 1
 #Run Time: real 0.849 user 0.229636 sys 0.058009 Query 2
@@ -39,4 +39,4 @@ plt.legend(handles=[bnlj,hashj,sqlj])
 #plt.set_xticklabels(['BNLJ','HashJ','SQLJ'])
 plt.autoscale(tight=True)
 plt.show()
-plt.savefig("PYPLOT WITH SMALL VALUES")
+#plt.savefig("PYPLOT WITH SMALL VALUES.png")
