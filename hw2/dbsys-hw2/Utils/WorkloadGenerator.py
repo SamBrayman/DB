@@ -385,9 +385,6 @@ class WorkloadGenerator:
 
         #COUNT
         #'''
-        for page in db.processQuery(query1):
-            for tup in page[1]:
-                print(tup)
         results = [nameCountSchema.unpack(tup) for page in db.processQuery(query1) for tup in page[1] ]
 
         dict1 = {}
@@ -422,7 +419,7 @@ class WorkloadGenerator:
         # relation by name
         #print out by name
         nameSchema = DBSchema('id', [('id', 'int')])
-        nameCountSchema = DBSchema('namecount',[('name2','char(55)')])#,[('count','int')])
+        nameCountSchema = DBSchema('namecount',[('P_NAME','char(55)')])#,[('count','int')])
         query1 = query1.groupBy( \
           groupSchema=nameSchema, \
           aggSchema=nameCountSchema, \
@@ -435,11 +432,8 @@ class WorkloadGenerator:
         query1 = query1.select({'P_NAME': ('P_NAME', 'char(55)')}).finalize()
 
         #COUNT
-        '''
-        #for page in db.processQuery(query1):
-        #    for tup in page[1]:
-        #        print(tup)
-        #results = [nameSchema.unpack(tup) for page in db.processQuery(query1) for tup in page[1]]
+        #'''
+        results = [nameSchema.unpack(tup) for page in db.processQuery(query1) for tup in page[1]]
         dict1 = {}
         for tup in results:
             if(tup[0] in dict1):
@@ -447,7 +441,7 @@ class WorkloadGenerator:
             else:
                 dict1[tup[0]] = 1
 
-        '''
+        #'''
         print("query2 HASH")
         end = time.time()
         print("Execution time: " + str(end - start))
@@ -480,7 +474,7 @@ class WorkloadGenerator:
 
         #GROUPY BY 1
         nameSchema = DBSchema('id', [('id', 'int')])
-        nameCountSchema = DBSchema('namecount',[('name2','char(55)')])#,[('count','int')])
+        nameCountSchema = DBSchema('namecount',[('P_NAME','char(55)')])#,[('count','int')])
         query1 = query1.groupBy( \
           groupSchema=nameSchema, \
           aggSchema=nameCountSchema, \
@@ -491,7 +485,7 @@ class WorkloadGenerator:
 
         #GROUP BY 2
         nameSchema = DBSchema('id', [('id', 'int')])
-        nameCountSchema = DBSchema('namecount',[('name2','char(55)')])#,[('count','int')])
+        nameCountSchema = DBSchema('namecount',[('P_NAME','char(55)')])#,[('count','int')])
         query1 = query1.groupBy( \
           groupSchema=nameSchema, \
           aggSchema=nameCountSchema, \
@@ -506,7 +500,7 @@ class WorkloadGenerator:
 
         #GROUP BY 3
         nameSchema = DBSchema('id', [('id', 'int')])
-        nameCountSchema = DBSchema('namecount',[('name2','char(55)')])#,[('count','int')])
+        nameCountSchema = DBSchema('namecount',[('N_NAME','char(55)')])#,[('count','int')])
         query1 = query1.groupBy( \
           groupSchema=nameSchema, \
           aggSchema=nameCountSchema, \
@@ -519,7 +513,7 @@ class WorkloadGenerator:
         query1 = query1.select({'nation': ('N_NAME', 'char(55)')}).finalize()
 
         #SUM
-        '''
+        #'''
         results = [nameSchema.unpack(tup) for page in db.processQuery(query1) for tup in page[1] ]
         dict1 = {}
         for tup in results:
@@ -574,7 +568,7 @@ class WorkloadGenerator:
 
         #GROUPY BY 1
         nameSchema = DBSchema('id', [('id', 'int')])
-        nameCountSchema = DBSchema('namecount',[('name2','char(55)')])#,[('count','int')])
+        nameCountSchema = DBSchema('namecount',[('P_NAME','char(55)')])#,[('count','int')])
         query1 = query1.groupBy( \
           groupSchema=nameSchema, \
           aggSchema=nameCountSchema, \
@@ -585,7 +579,7 @@ class WorkloadGenerator:
 
         #GROUP BY 2
         nameSchema = DBSchema('id', [('id', 'int')])
-        nameCountSchema = DBSchema('namecount',[('name2','char(55)')])#,[('count','int')])
+        nameCountSchema = DBSchema('namecount',[('N_NAME','char(55)')])#,[('count','int')])
         query1 = query1.groupBy( \
           groupSchema=nameSchema, \
           aggSchema=nameCountSchema, \
@@ -600,7 +594,7 @@ class WorkloadGenerator:
 
         #GROUP BY 3
         nameSchema = DBSchema('id', [('id', 'int')])
-        nameCountSchema = DBSchema('namecount',[('name2','char(55)')])#,[('count','int')])
+        nameCountSchema = DBSchema('namecount',[('N_NAME','char(55)')])#,[('count','int')])
         query1 = query1.groupBy( \
           groupSchema=nameSchema, \
           aggSchema=nameCountSchema, \
@@ -613,7 +607,7 @@ class WorkloadGenerator:
         query1 = query1.select({'nation': ('N_NAME', 'char(55)')}).finalize()
 
         #SUM
-        '''
+        #'''
         results = [nameSchema.unpack(tup) for page in db.processQuery(query1) for tup in page[1] ]
         dict1 = {}
         for tup in results:
@@ -654,7 +648,7 @@ class WorkloadGenerator:
 
         #GROUPY BY 1
         nameSchema = DBSchema('id', [('id', 'int')])
-        nameCountSchema = DBSchema('namecount',[('name2','char(55)')])#,[('count','int')])
+        nameCountSchema = DBSchema('namecount',[('P_NAME','char(55)')])#,[('count','int')])
         query1 = query1.groupBy( \
           groupSchema=nameSchema, \
           aggSchema=nameCountSchema, \
@@ -665,7 +659,7 @@ class WorkloadGenerator:
 
         #GROUP BY 2
         nameSchema = DBSchema('id', [('id', 'int')])
-        nameCountSchema = DBSchema('namecount',[('name2','char(55)')])#,[('count','int')])
+        nameCountSchema = DBSchema('namecount',[('N_NAME','char(55)')])#,[('count','int')])
         query1 = query1.groupBy( \
           groupSchema=nameSchema, \
           aggSchema=nameCountSchema, \
@@ -680,7 +674,7 @@ class WorkloadGenerator:
 
         #GROUP BY 3
         nameSchema = DBSchema('id', [('id', 'int')])
-        nameCountSchema = DBSchema('namecount',[('name2','char(55)')])#,[('count','int')])
+        nameCountSchema = DBSchema('namecount',[('N_NAME','char(55)')])#,[('count','int')])
         query1 = query1.groupBy( \
           groupSchema=nameSchema, \
           aggSchema=nameCountSchema, \
@@ -693,7 +687,7 @@ class WorkloadGenerator:
         query1 = query1.select({'nation': ('N_NAME', 'char(55)')}).finalize()
 
         #SUM
-        '''
+        #'''
         results = [nameSchema.unpack(tup) for page in db.processQuery(query1) for tup in page[1] ]
         dict1 = {}
         for tup in results:
@@ -748,7 +742,7 @@ class WorkloadGenerator:
 
         #GROUPY BY 1
         nameSchema = DBSchema('id', [('id', 'int')])
-        nameCountSchema = DBSchema('namecount',[('name2','char(55)')])#,[('count','int')])
+        nameCountSchema = DBSchema('namecount',[('P_NAME','char(55)')])#,[('count','int')])
         query1 = query1.groupBy( \
           groupSchema=nameSchema, \
           aggSchema=nameCountSchema, \
@@ -759,7 +753,7 @@ class WorkloadGenerator:
 
         #GROUP BY 2
         nameSchema = DBSchema('id', [('id', 'int')])
-        nameCountSchema = DBSchema('namecount',[('name2','char(55)')])#,[('count','int')])
+        nameCountSchema = DBSchema('namecount',[('N_NAME','char(55)')])#,[('count','int')])
         query1 = query1.groupBy( \
           groupSchema=nameSchema, \
           aggSchema=nameCountSchema, \
@@ -774,7 +768,7 @@ class WorkloadGenerator:
 
         #GROUP BY 3
         nameSchema = DBSchema('id', [('id', 'int')])
-        nameCountSchema = DBSchema('namecount',[('name2','char(55)')])#,[('count','int')])
+        nameCountSchema = DBSchema('namecount',[('N_NAME','char(55)')])#,[('count','int')])
         query1 = query1.groupBy( \
           groupSchema=nameSchema, \
           aggSchema=nameCountSchema, \
@@ -787,7 +781,7 @@ class WorkloadGenerator:
         query1 = query1.select({'nation': ('N_NAME', 'char(55)')}).finalize()
 
         #SUM
-        '''
+        #'''
         results = [nameSchema.unpack(tup) for page in db.processQuery(query1) for tup in page[1] ]
         dict1 = {}
         for tup in results:
