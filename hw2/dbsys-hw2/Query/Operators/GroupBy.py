@@ -90,7 +90,8 @@ class GroupBy(Operator):
         unpackedTuple = self.subSchema.unpack(inputTuple)
         groupValue = (self.groupExpr(unpackedTuple),)
         partKey = self.groupHashFn(groupValue)
-        self.storage.createRelation(str(partKey),self.outputSchema)
+        self.storage.createRelation(str(partKey),self.subSchema)#self.outputSchema)
+        #create on old schema
         #print(partKey)
         #print(unpackedTuple)
         #print(self.outputSchema.fields)
@@ -134,21 +135,21 @@ class GroupBy(Operator):
                 #unpackedTuple2 = self.subSchema.unpack(tup)
                 #for i in range(len(self.aggExprs)):
                     #absLst[i] = self.aggExprs[i][1](absLst[i],unpackedTuple)
-                for i in range(len(self.aggExprs)):
-                    if(unpackedTuple[i+1]== absLst[i]):
+                #COMMENTED#for i in range(len(self.aggExprs)):
+                    #COMMENTED#if(unpackedTuple[i+1]== absLst[i]):
                         #print(str(absLst[i]) + " " + str(unpackedTuple.age))
                         #print(want)
                         #unpackedTuple = self.schema().unpack(tup)
                         #intup = (unpackedTuple)
                         #print(unpackedTuple)
-                        groupByExprEnv = self.loadSchema(self.schema(), tup)
+                groupByExprEnv = self.loadSchema(self.schema(), tup)
                         #print(groupByExprEnv)
                         #print(globals())
                         #print(self.groupByExpr)
                         #if eval(self.aggExprs, globals(), groupByExprEnv):
-                        outputTuple = self.outputSchema.instantiate(*[groupByExprEnv[f] for f in self.outputSchema.fields])
+                outputTuple = self.outputSchema.instantiate(*[groupByExprEnv[f] for f in self.outputSchema.fields])
                         #print(outputTuple)
-                        self.emitOutputTuple(self.outputSchema.pack(outputTuple))
+                self.emitOutputTuple(self.outputSchema.pack(outputTuple))
             if self.outputPages:
                 self.outputPages = [self.outputPages[-1]]
     for key in hshKeys:

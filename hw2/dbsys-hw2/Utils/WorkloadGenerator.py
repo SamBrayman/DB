@@ -384,6 +384,7 @@ class WorkloadGenerator:
         query1 = query1.select({'P_NAME': ('P_NAME', 'char(55)')}).finalize()
 
         #COUNT
+        '''
         for page in db.processQuery(query1):
             for tup in page[1]:
                 print(tup)
@@ -395,6 +396,7 @@ class WorkloadGenerator:
                 dict1[tup[0]] = dict1[tup[0]] + 1
             else:
                 dict1[tup[0]] = 1
+        '''
 
         print("query2 BNLJ")
         end = time.time()
@@ -426,17 +428,18 @@ class WorkloadGenerator:
           aggSchema=nameCountSchema, \
           groupExpr=(lambda e: e.P_NAME), \
           aggExprs=[("part", lambda acc, e: e.P_NAME, lambda x: x)], \
-          groupHashFn=(lambda gbVal: hash(gbVal) % 10000000) \
+          groupHashFn=(lambda gbVal: hash(gbVal) % 1000) \
         )
 
         #SELECT 2
         query1 = query1.select({'P_NAME': ('P_NAME', 'char(55)')}).finalize()
 
         #COUNT
+        '''
         #for page in db.processQuery(query1):
         #    for tup in page[1]:
         #        print(tup)
-        results = [nameSchema.unpack(tup) for page in db.processQuery(query1) for tup in page[1] ]
+        #results = [nameSchema.unpack(tup) for page in db.processQuery(query1) for tup in page[1]]
         dict1 = {}
         for tup in results:
             if(tup[0] in dict1):
@@ -444,7 +447,7 @@ class WorkloadGenerator:
             else:
                 dict1[tup[0]] = 1
 
-
+        '''
         print("query2 HASH")
         end = time.time()
         print("Execution time: " + str(end - start))
@@ -483,7 +486,7 @@ class WorkloadGenerator:
           aggSchema=nameCountSchema, \
           groupExpr=(lambda e: e.P_NAME), \
           aggExprs=[("part", lambda acc, e: e.P_NAME, lambda x: x)], \
-          groupHashFn=(lambda gbVal: hash(gbVal) % 10000000) \
+          groupHashFn=(lambda gbVal: hash(gbVal) % 100) \
         )
 
         #GROUP BY 2
@@ -494,7 +497,7 @@ class WorkloadGenerator:
           aggSchema=nameCountSchema, \
           groupExpr=(lambda e: e.N_NAME), \
           aggExprs=[("part", lambda acc, e: e.N_NAME, lambda x: x)], \
-          groupHashFn=(lambda gbVal: hash(gbVal) % 10000000) \
+          groupHashFn=(lambda gbVal: hash(gbVal) % 100) \
         )
 
         #SELECT 1
@@ -509,14 +512,14 @@ class WorkloadGenerator:
           aggSchema=nameCountSchema, \
           groupExpr=(lambda e: e.N_NAME), \
           aggExprs=[("part", lambda acc, e: e.N_NAME, lambda x: x)], \
-          groupHashFn=(lambda gbVal: hash(gbVal) % 10000000) \
+          groupHashFn=(lambda gbVal: hash(gbVal) % 100) \
         )
 
         #SELECT 2
         query1 = query1.select({'nation': ('N_NAME', 'char(55)')}).finalize()
 
         #SUM
-        #'''
+        '''
         results = [nameSchema.unpack(tup) for page in db.processQuery(query1) for tup in page[1] ]
         dict1 = {}
         for tup in results:
@@ -577,7 +580,7 @@ class WorkloadGenerator:
           aggSchema=nameCountSchema, \
           groupExpr=(lambda e: e.P_NAME), \
           aggExprs=[("part", lambda acc, e: e.P_NAME, lambda x: x)], \
-          groupHashFn=(lambda gbVal: hash(gbVal) % 10000000) \
+          groupHashFn=(lambda gbVal: hash(gbVal) % 100) \
         )
 
         #GROUP BY 2
@@ -588,7 +591,7 @@ class WorkloadGenerator:
           aggSchema=nameCountSchema, \
           groupExpr=(lambda e: e.N_NAME), \
           aggExprs=[("part", lambda acc, e: e.N_NAME, lambda x: x)], \
-          groupHashFn=(lambda gbVal: hash(gbVal) % 10000000) \
+          groupHashFn=(lambda gbVal: hash(gbVal) % 100) \
         )
 
         #SELECT 1
@@ -603,7 +606,7 @@ class WorkloadGenerator:
           aggSchema=nameCountSchema, \
           groupExpr=(lambda e: e.N_NAME), \
           aggExprs=[("part", lambda acc, e: e.N_NAME, lambda x: x)], \
-          groupHashFn=(lambda gbVal: hash(gbVal) % 10000000) \
+          groupHashFn=(lambda gbVal: hash(gbVal) % 100) \
         )
 
         #SELECT 2
@@ -657,7 +660,7 @@ class WorkloadGenerator:
           aggSchema=nameCountSchema, \
           groupExpr=(lambda e: e.P_NAME), \
           aggExprs=[("part", lambda acc, e: e.P_NAME, lambda x: x)], \
-          groupHashFn=(lambda gbVal: hash(gbVal) % 10000000) \
+          groupHashFn=(lambda gbVal: hash(gbVal) % 100) \
         )
 
         #GROUP BY 2
@@ -668,7 +671,7 @@ class WorkloadGenerator:
           aggSchema=nameCountSchema, \
           groupExpr=(lambda e: e.N_NAME), \
           aggExprs=[("part", lambda acc, e: e.N_NAME, lambda x: x)], \
-          groupHashFn=(lambda gbVal: hash(gbVal) % 10000000) \
+          groupHashFn=(lambda gbVal: hash(gbVal) % 100) \
         )
 
         #SELECT 1
@@ -683,14 +686,14 @@ class WorkloadGenerator:
           aggSchema=nameCountSchema, \
           groupExpr=(lambda e: e.N_NAME), \
           aggExprs=[("part", lambda acc, e: e.N_NAME, lambda x: x)], \
-          groupHashFn=(lambda gbVal: hash(gbVal) % 10000000) \
+          groupHashFn=(lambda gbVal: hash(gbVal) % 100) \
         )
 
         #SELECT 2
         query1 = query1.select({'nation': ('N_NAME', 'char(55)')}).finalize()
 
         #SUM
-        #'''
+        '''
         results = [nameSchema.unpack(tup) for page in db.processQuery(query1) for tup in page[1] ]
         dict1 = {}
         for tup in results:
@@ -751,7 +754,7 @@ class WorkloadGenerator:
           aggSchema=nameCountSchema, \
           groupExpr=(lambda e: e.P_NAME), \
           aggExprs=[("part", lambda acc, e: e.P_NAME, lambda x: x)], \
-          groupHashFn=(lambda gbVal: hash(gbVal) % 10000000) \
+          groupHashFn=(lambda gbVal: hash(gbVal) % 100) \
         )
 
         #GROUP BY 2
@@ -762,7 +765,7 @@ class WorkloadGenerator:
           aggSchema=nameCountSchema, \
           groupExpr=(lambda e: e.N_NAME), \
           aggExprs=[("part", lambda acc, e: e.N_NAME, lambda x: x)], \
-          groupHashFn=(lambda gbVal: hash(gbVal) % 10000000) \
+          groupHashFn=(lambda gbVal: hash(gbVal) % 100) \
         )
 
         #SELECT 1
@@ -777,7 +780,7 @@ class WorkloadGenerator:
           aggSchema=nameCountSchema, \
           groupExpr=(lambda e: e.N_NAME), \
           aggExprs=[("part", lambda acc, e: e.N_NAME, lambda x: x)], \
-          groupHashFn=(lambda gbVal: hash(gbVal) % 10000000) \
+          groupHashFn=(lambda gbVal: hash(gbVal) % 100) \
         )
 
         #SELECT 2
