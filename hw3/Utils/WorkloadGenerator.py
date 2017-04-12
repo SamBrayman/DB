@@ -39,7 +39,7 @@ class WorkloadGenerator:
   >>> db.close()
   >>> shutil.rmtree(db.fileManager().dataDir, ignore_errors=True)
   >>> del db
-  
+
   >>> wg.runWorkload('test/datasets/tpch-tiny', 1.0, 4096, 1) # doctest:+ELLIPSIS
   Tuples: 736
   Throughput: ...
@@ -84,7 +84,7 @@ class WorkloadGenerator:
                        ('P_RETAILPRICE', 'double'),
                        ('P_COMMENT'    , 'char(23)') ]
                ,      "issssisds"),
-        
+
         ('supplier', [ ('S_SUPPKEY'   , 'int'),
                        ('S_NAME'      , 'char(25)'),
                        ('S_ADDRESS'   , 'char(40)'),
@@ -93,14 +93,14 @@ class WorkloadGenerator:
                        ('S_ACCTBAL'   , 'double'),
                        ('S_COMMENT'   , 'char(101)') ]
                    ,  "issisds"),
-        
+
         ('partsupp', [ ('PS_PARTKEY'    , 'int'),
                        ('PS_SUPPKEY'    , 'int'),
                        ('PS_AVAILQTY'   , 'int'),
                        ('PS_SUPPLYCOST' , 'double'),
                        ('PS_COMMENT'    , 'char(199)') ]
                    , "iiids"),
-        
+
         ('customer', [ ('C_CUSTKEY'    , 'int'),
                        ('C_NAME'       , 'char(25)'),
                        ('C_ADDRESS'    , 'char(40)'),
@@ -110,7 +110,7 @@ class WorkloadGenerator:
                        ('C_MKTSEGMENT' , 'char(10)'),
                        ('C_COMMENT'    , 'char(117)') ]
                    , "issisdss"),
-        
+
         ('orders',   [ ('O_ORDERKEY'      , 'int'),
                        ('O_CUSTKEY'       , 'int'),
                        ('O_ORDERSTATUS'   , 'char(1)'),
@@ -121,7 +121,7 @@ class WorkloadGenerator:
                        ('O_SHIPPRIORITY'  , 'int'),
                        ('O_COMMENT'       , 'char(79)') ]
                  ,   "iisdtssis"),
-        
+
         ('lineitem', [ ('L_ORDERKEY'      , 'int'),
                        ('L_PARTKEY'       , 'int'),
                        ('L_SUPPKEY'       , 'int'),
@@ -139,13 +139,13 @@ class WorkloadGenerator:
                        ('L_SHIPMODE'      , 'char(10)'),
                        ('L_COMMENT'       , 'char(44)') ]
                    , "iiiiddddsstttsss"),
-        
+
         ('nation',   [ ('N_NATIONKEY'  , 'int'),
                        ('N_NAME'       , 'char(25)'),
                        ('N_REGIONKEY'  , 'int'),
                        ('N_COMMENT'    , 'char(152)') ]
                  ,   "isis"),
-        
+
         ('region',   [ ('R_REGIONKEY' , 'int'),
                        ('R_NAME'      , 'char(25)'),
                        ('R_COMMENT'   , 'char(152)') ]
@@ -212,18 +212,18 @@ class WorkloadGenerator:
   def scanRelations(self, db, relations):
     start = time.time()
     tuplesRead = 0
-    
+
     # Sequentially read through relations
     for rel in relations:
       for t in db.storageEngine().tuples(rel):
         tuplesRead += 1
-    
+
     end = time.time()
     print("Tuples: " + str(tuplesRead))
     print("Throughput: " + str(tuplesRead / (end - start)))
     print("Execution time: " + str(end - start))
 
-  # Randomized access for 1/fraction read operations on the 
+  # Randomized access for 1/fraction read operations on the
   # stored tuples for the given relations.
   def randomizedOperations(self, db, relations, fraction):
 
@@ -258,6 +258,14 @@ class WorkloadGenerator:
     print("Throughput: " + str(tuplesRead / (end - start)))
     print("Execution time: " + str(end - start))
 
+
+  def query1(self,db,relations):
+  def query2(self,db,relations):
+  def query3(self,db,relations):
+  def query4(self,db,relations):
+  def query5(self,db,relations):
+
+
   # Dispatch a workload mode.
   def runOperations(self, db, mode):
     if hasattr(self, 'tupleIds') and self.tupleIds:
@@ -272,6 +280,26 @@ class WorkloadGenerator:
 
       elif mode == 4:
         self.randomizedOperations(db, ['lineitem', 'orders'], 0.8)
+
+      elif mode == 5:
+          self.query1(db,['lineitem'])
+          self.query1(db,['lineitem'])
+
+      elif mode == 6:
+          self.query2(db,['lineitem','part'])
+          self.query2(db,['lineitem','part'])
+
+      elif mode == 7:
+          self.query3(db,['customer','orders','lineitem'])
+          self.query3(db,['customer','orders','lineitem'])
+
+      elif mode == 8:
+          self.query4(db,['customer','orders','lineitem','nation'])
+          self.query4(db,['customer','orders','lineitem','nation'])
+
+      elif mode == 9:
+          self.query5(db,['customer','orders','lineitem','nation','supplier','region'])
+          self.query5(db,['customer','orders','lineitem','nation','supplier','region'])
 
       else:
         raise ValueError("Invalid workload mode (expected 1-4): "+str(mode))

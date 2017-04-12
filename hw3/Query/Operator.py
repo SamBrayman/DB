@@ -155,7 +155,7 @@ class Operator:
 
   # Returns this operator's selectivity, either as an estimate or
   # a profiled actual selectivity.
-  def selectivity(self, estimated):
+  def selectivit(self, estimated):
     numInputs = sum(map(lambda x: x.cardinality(estimated), self.inputs()))
     numOutputs = self.cardinality(estimated)
     return numOutputs / numInputs
@@ -169,4 +169,49 @@ class Operator:
 
   def localCost(self, estimated):
     numInputs = sum(map(lambda x: x.cardinality(estimated), self.inputs()))
-    return numInputs * self.tupleCost
+    if self.operatorType() == "NLJoin":
+        numPages = numInputs / self.storage.bufferPool.pageSize
+        #Assume RHS is 75% of Tuples
+        numPagesS = numPages * .75
+        numPagesR = numPages * .25
+        return numPagesR + (numPagesS * self.tupleCost)
+    elif self.operatorType() == "BNLJoin":
+        numPages = numInputs / self.storage.bufferPool.pageSize
+        #Assume RHS is 75% of Tuples
+        numPagesS = numPages * .75
+        numPagesR = numPages * .25
+        return numPagesR + (numPagesR / ((self.storage.bufferPool.poolSize - 2) * numPagesS))
+    elif self.operatorType() == "IndexJoin":
+        numPages = numInputs / self.storage.bufferPool.pageSize
+        indexP = self.selectivity
+        kP = self.storage.getIndex(self.indexId).indexCounter
+        return numPages + (self.tupleCost * (kP + indexP))
+    elif self.operatorType() == "HashJoin":
+        numPages = numInputs / self.storage.bufferPool.pageSize
+        #Assume RHS is 75% of Tuples
+        numPagesS = numPages * .75
+        numPagesR = numPages * .25
+        return 3 * (numPagesR + numPagesS)
+    elif self.operatorType() == "GroupBy":
+        numPages = numInputs / self.storage.bufferPool.pageSize
+        #Assume 1 second for seek
+        blocks = numPages / self.bufferPool.poolSize
+        return  1 + (blocks * self.tupleCost)  
+    elif self.operatorType() == "UnionAll":
+        numPages = numInputs / self.storage.bufferPool.pageSize
+        #Assume 1 second for seek
+        blocks = numPages / self.bufferPool.poolSize
+        return  2 + (blocks * self.tupleCost) 
+    elif self.operatorType() == "Select":
+        #Assume worst case relation doesn't fit in memory
+        numPages = numInputs / self.storage.bufferPool.pageSize
+        #Assume 1 second for seek
+        blocks = numPages / self.bufferPool.poolSize
+        if ("=" in self.selectExpr and "<" not in self.selectExpr and ">" not in self.selectExpr):
+            return 1 + ((blocks / 2) * self.tupleCost)
+        else:
+            return  1 + (blocks * self.tupleCost)
+    else:
+        #elif self.operatorType() == "TableScan":
+        #elif self.operatorType() == "Project":
+        return numInputs  * self.tupleCost
