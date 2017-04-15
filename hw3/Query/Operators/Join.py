@@ -339,6 +339,36 @@ class Join(Operator):
 
 
   # Plan and statistics information
+  def cost(self, estimated):
+      super().cost(estimated)
+
+  def localCost(self, estimated):
+    numInputs = sum(map(lambda x: x.cardinality(estimated), self.inputs()))
+    if self.operatorType() == "NLJoin":
+        numPages = numInputs / self.storage.bufferPool.pageSize
+        #Assume RHS is 75% of Tuples
+        numPagesS = numPages * .75
+        numPagesR = numPages * .25
+        return numPagesR + (numPagesS * self.tupleCost)
+    elif self.operatorType() == "BNLJoin":
+        numPages = numInputs / self.storage.bufferPool.pageSize
+        #Assume RHS is 75% of Tuples
+        numPagesS = numPages * .75
+        numPagesR = numPages * .25
+        return numPagesR + (numPagesR / ((self.storage.bufferPool.poolSize - 2) * numPagesS))
+    elif self.operatorType() == "IndexJoin":
+        numPages = numInputs / self.storage.bufferPool.pageSize
+        indexP = self.selectivity
+        kP = self.storage.getIndex(self.indexId).indexCounter
+        return numPages + (self.tupleCost * (kP + indexP))
+    elif self.operatorType() == "HashJoin":
+        numPages = numInputs / self.storage.bufferPool.pageSize
+        #Assume RHS is 75% of Tuples
+        numPagesS = numPages * .75
+        numPagesR = numPages * .25
+        return 3 * (numPagesR + numPagesS)
+
+
 
   # Returns a single line description of the operator.
   def explain(self):

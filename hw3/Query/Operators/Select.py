@@ -92,5 +92,19 @@ class Select(Operator):
   # Plan and statistics information
 
   # Returns a single line description of the operator.
+  def cost(self,estimated):
+      super().cost(estimated)
+
+  def localCost(self,estimated):
+      numInputs = sum(map(lambda x: x.cardinality(estimated), self.inputs()))
+      #Assume worst case relation doesn't fit in memory
+      numPages = numInputs / self.storage.bufferPool.pageSize
+      #Assume 1 second for seek
+      blocks = numPages / self.bufferPool.poolSize
+      if ("=" in self.selectExpr and "<" not in self.selectExpr and ">" not in self.selectExpr):
+          return 1 + ((blocks / 2) * self.tupleCost)
+      else:
+          return  1 + (blocks * self.tupleCost)
+
   def explain(self):
     return super().explain() + "(predicate='" + str(self.selectExpr) + "')"

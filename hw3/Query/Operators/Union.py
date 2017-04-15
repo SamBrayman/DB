@@ -93,3 +93,14 @@ class Union(Operator):
 
     # Return an iterator to the output relation
     return self.storage.pages(self.relationId())
+
+  def cost(self,estimated):
+      super().cost(estimated)
+
+  def localCost(self,estimated):
+      numInputs = sum(map(lambda x: x.cardinality(estimated), self.inputs()))
+      numPages = numInputs / self.storage.bufferPool.pageSize
+      #Assume 1 second for seek
+      blocks = numPages / self.bufferPool.poolSize
+      return  2 + (blocks * self.tupleCost)
+

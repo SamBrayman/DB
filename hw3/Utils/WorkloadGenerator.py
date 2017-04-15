@@ -259,11 +259,181 @@ class WorkloadGenerator:
     print("Execution time: " + str(end - start))
 
 
-  def query1(self,db,relations):
-  def query2(self,db,relations):
-  def query3(self,db,relations):
-  def query4(self,db,relations):
-  def query5(self,db,relations):
+  def query1(self,db,relations,opt):
+      start = time.time()
+      '''query4 = db.query().fromTable('employee').join( \
+        db.query().fromTable('department'), \
+        method='block-nested-loops', expr='id == eid').finalize()
+        .select({'id': ('id', 'int')})
+'''
+      query = db.query().fromTable(relations[0]).where("L_SHIPDATE >= 19940101")
+      query = query.where("L_SHIPDATE < 19950101")
+      query = query.where("L_DISCOUNT > .05")
+      query = query.where("L_DISCOUNT < .07")
+      query = query.where("L_QUANTITY < 24")
+      #sum(l_extendedprice * l_discount) as revenue
+      query = query.select({'L_EXTENDEDPRICE': ('L_EXTENDEDPRICE','double'), 'L_DISCOUNT':('L_DISCOUNT','double')})
+      query = query.finalize()
+      nameSchema = DBSchema('atts', [('L_EXTENDEDPRICE','double'),('L_DISCOUNT','double')])
+      if(opt):
+          query = db.optimizer.pushdownOperators(query)
+          query = db.optimizer.pickJoinOrder(query)
+          results = [nameSchema.unpack(tup) for page in db.processQuery(query) for tup in page[1] ]
+      else:
+          results = [nameSchema.unpack(tup) for page in db.processQuery(query) for tup in page[1] ]
+      sumLEPLD = 0.0
+      for tup in results:
+          sumLEPLD += tup[0] * tup[1]
+      end = time.time()
+      if(opt):
+        print("query1 Optimized")
+      else:
+        print("query1")
+      print("Execution time: " + str(end - start))
+
+
+  def query2(self,db,relations,opt):
+      start = time.time()
+      query = db.query().fromTable(relations[0]).where("L_SHIPDATE >= 19950901")
+      query = query.where("L_SHIPDATE < 19951001")
+      query2 = db.query().fromTable(relations[1])
+      query = query.join( \
+              query2,\
+              method='block-nested-loops', expr = 'L_PARTKEY == P_PARTKEY')
+      query = query.select({'L_EXTENDEDPRICE': ('L_EXTENDEDPRICE','double'), 'L_DISCOUNT':('L_DISCOUNT','double')})
+      query = query.finalize()
+      nameSchema = DBSchema('atts', [('L_EXTENDEDPRICE','double'),('L_DISCOUNT','double')])
+      if(opt):
+          db.optimizer.pushdownOperators(query)
+          db.optimizer.pickJoinOrder(query)
+          results = [nameSchema.unpack(tup) for page in db.processQuery(query) for tup in page[1] ]
+      else:
+          results = [nameSchema.unpack(tup) for page in db.processQuery(query) for tup in page[1] ]
+      sumLEPLD = 0.0
+      for tup in results:
+          sumLEPLD += tup[0] * (1-tup[1])
+      end = time.time()
+      if(opt):
+        print("query2 Optimized")
+      else:
+        print("query2")
+      print("Execution time: " + str(end - start))
+
+
+  def query3(self,db,relations,opt):
+      start = time.time()
+      query = db.query().fromTable(relations[2]).where('L_SHIPDATE > 19950315')
+      query = query.join( \
+              db.query().fromTable(relations[1]).where('O_ORDERDATE < 19950315'),\
+              method ='block-nested-loops', expr = 'L_ORDERKEY == O_ORDERKEY')
+      query = query.join( \
+              db.query().fromTable(relations[0]).where('C_MKTSEGMENT == \'BUILDING\''),\
+              method = 'block-nested-loops',expr = 'O_CUSTKEY == C_CUSTKEY')
+      keySchema = DBSchema('atts',[('L_ORDERKEY','int'),('O_ORDERDATE','int'),('O_SHIPPRIORITY','int')])
+      aggrSchema = DBSchema('aggs',[('revenue','double')])
+      query = query.groupBy( \
+              groupSchema = keySchema,\
+              aggSchema =aggrSchema,\
+              groupExpr=(lambda e: (e.L_ORDERKEY,e.O_ORDERDATE,e.O_SHIPPRIORITY)),\
+              aggExprs=[(0,lambda acc,e: e.L_EXTENDEDPRICE * (1-e.L_DISCOUNT),lambda x:x)],\
+              groupHashFn=(lambda gbVal: hash((gbVal[0] + gbVal[1] + gbVal[2]) % 10))).finalize()
+      if(opt):
+          db.optimizer.pushdownOperators(query)
+          db.optimizer.pickJoinOrder(query)
+          end = time.time()
+          results = [nameSchema.unpack(tup) for page in db.processQuery(query) for tup in page[1] ]
+      else:
+          end = time.time()
+          results = [nameSchema.unpack(tup) for page in db.processQuery(query) for tup in page[1] ]
+      if(opt):
+        print("query3 Optimized")
+      else:
+        print("query3")
+      print("Execution time: " + str(end - start))
+
+
+  def query4(self,db,relations,opt):
+      start = time.time()
+      query = db.query().fromTable(relations[0])
+      query2 = db.query().fromTable(relations[1]).where('O_ORDERDATE < 19940101')
+      query2 = query2.where('O_ORDERDATE >= 19931001')
+      query3 = db.query().fromTable(relations[2]).where('L_RETURNFLAG == \'R\'')
+      query3 = query3.join(\
+              query2,\
+              method='block-nested-loops',expr='L_ORDERKEY == O_ORDERKEY')
+      query = query.join(\
+              db.query().fromTable(relations[3]),\
+              method='block-nested-loops',expr='C_NATIONKEY == N_NATIONKEY')
+      query = query.join(\
+              query3,\
+              method='block-nested-loops',expr='C_CUSTKEY == O_CUSTKEY')
+      keySchema = DBSchema('atts',[('C_CUSTKEY','int'),('C_NAME','char(25)'),('C_ACCTBAL','double'),\
+              ('C_PHONE','char(15)'),('N_NAME','char(25)'),('C_ADDRESS','char(40)'),('C_COMMENT','char(117)')])
+      aggrSchema = DBSchema('aggs',[('revenue','double')])
+      query = query.groupBy( \
+              groupSchema = keySchema,\
+              aggSchema =aggrSchema,\
+              groupExpr=(lambda e: (e.C_CUSTKEY,e.C_NAME,e.C_ACCTBAL,e.C_PHONE,e.N_NAME,e.C_ADDRESS,e.C_COMMENT)),\
+              aggExprs=[(0,lambda acc,e: e.L_EXTENDEDPRICE * (1-e.L_DISCOUNT),lambda x:x)],\
+              groupHashFn=(lambda gbVal: hash((gbVal[0] + gbVal[1] + gbVal[2] + gbVal[3] + \
+              gbVal[4] + gbVal[5] + gbVal[6]) % 10))).finalize()
+      if(opt):
+          query = db.optimizer.pushdownOperators(query)
+          query = db.optimizer.pickJoinOrder(query)
+          end = time.time()
+          results = [nameSchema.unpack(tup) for page in db.processQuery(query) for tup in page[1] ]
+      else:
+          end = time.time()
+          results = [nameSchema.unpack(tup) for page in db.processQuery(query) for tup in page[1] ]
+      if(opt):
+        print("query4 Optimized")
+      else:
+        print("query4")
+      print("Execution time: " + str(end - start))
+
+
+  def query5(self,db,relations,opt):
+      start = time.time()
+      query2 = db.query().fromTable(relations[1]).where('O_ORDERDATE >= 19940101')
+      query2 = query2.where('O_ORDERDATE < 19950101')
+      query3 = db.query().fromTable(relations[5]).where('R_NAME == \'ASIA\'')
+      query3 = db.query().fromTable(relations[4]).join(\
+              query3,\
+              method='block-nested-loops',expr='N_REGIONKEY == R_REGIONKEY')
+      query3 = db.query().fromTable(relations[3]).join(\
+              query3,\
+              method='block-nested-loops',expr='S_NATIONKEY == N_NATIONKEY')
+      query3 = db.query().fromTable(relations[0]).join(\
+              query3,\
+              method='block-nested-loops',expr='C_NATIONKEY == S_NATIONKEY')
+      query3 = db.query().fromTable(relations[2]).join(\
+              query3,\
+              method='block-nested-loops',expr='L_SUPPKEY == S_SUPPKEY')
+      query3 = query3.join(\
+              query2,\
+              method='block-nested-loops',expr='L_ORDERKEY == O_ORDERKEY')
+      query3 = query3.where('C_CUSTKEY == O_CUSTKEY')
+      keySchema = DBSchema('atts',[('N_NAME','char(25)')])
+      aggrSchema = DBSchema('aggs',[('revenue','double')])
+      query3 = query3.groupBy( \
+              groupSchema = keySchema,\
+              aggSchema =aggrSchema,\
+              groupExpr=(lambda e: e.N_NAME),\
+              aggExprs=[(0,lambda acc,e: e.L_EXTENDEDPRICE * (1-e.L_DISCOUNT),lambda x:x)],\
+              groupHashFn=(lambda gbVal: hash((gbVal[0]) % 10))).finalize()
+      if(opt):
+          query3 = db.optimizer.pushdownOperators(query3)
+          query3 = db.optimizer.pickJoinOrder(query3)
+          end = time.time()
+          results = [nameSchema.unpack(tup) for page in db.processQuery(query3) for tup in page[1] ]
+      else:
+          end = time.time()
+          results = [nameSchema.unpack(tup) for page in db.processQuery(query3) for tup in page[1] ]
+      if(opt):
+        print("query5 Optimized")
+      else:
+        print("query5")
+      print("Execution time: " + str(end - start))
 
 
   # Dispatch a workload mode.
@@ -282,24 +452,24 @@ class WorkloadGenerator:
         self.randomizedOperations(db, ['lineitem', 'orders'], 0.8)
 
       elif mode == 5:
-          self.query1(db,['lineitem'])
-          self.query1(db,['lineitem'])
+          self.query1(db,['lineitem'],False)
+          #self.query1(db,['lineitem'],True)
 
       elif mode == 6:
-          self.query2(db,['lineitem','part'])
-          self.query2(db,['lineitem','part'])
+          self.query2(db,['lineitem','part'],False)
+          #self.query2(db,['lineitem','part'],True)
 
       elif mode == 7:
-          self.query3(db,['customer','orders','lineitem'])
-          self.query3(db,['customer','orders','lineitem'])
+          self.query3(db,['customer','orders','lineitem'],False)
+          #self.query3(db,['customer','orders','lineitem'],True)
 
       elif mode == 8:
-          self.query4(db,['customer','orders','lineitem','nation'])
-          self.query4(db,['customer','orders','lineitem','nation'])
+          self.query4(db,['customer','orders','lineitem','nation'],False)
+          #self.query4(db,['customer','orders','lineitem','nation'],True)
 
       elif mode == 9:
-          self.query5(db,['customer','orders','lineitem','nation','supplier','region'])
-          self.query5(db,['customer','orders','lineitem','nation','supplier','region'])
+          self.query5(db,['customer','orders','lineitem','nation','supplier','region'],False)
+          #self.query5(db,['customer','orders','lineitem','nation','supplier','region'],True)
 
       else:
         raise ValueError("Invalid workload mode (expected 1-4): "+str(mode))
@@ -311,6 +481,10 @@ class WorkloadGenerator:
     self.createRelations(db)
     self.loadDataset(db, datadir, scaleFactor)
     self.runOperations(db, workloadMode)
+    self.runOperations(db, workloadMode + 1)
+    self.runOperations(db, workloadMode + 2)
+    self.runOperations(db, workloadMode + 3)
+    self.runOperations(db, workloadMode + 4)
     db.close()
     shutil.rmtree(db.fileManager().dataDir, ignore_errors=True)
     del db

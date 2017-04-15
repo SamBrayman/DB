@@ -103,7 +103,12 @@ class Project(Operator):
 
 
   # Plan and statistics information
+  def cost(self,estimated):
+      super().cost(estimated)
 
+  def localCost(self,estimated):
+     numInputs = sum(map(lambda x: x.cardinality(estimated), self.inputs()))
+     return numInputs  * self.tupleCost
   # Returns a single line description of the operator.
   def explain(self):
     return super().explain() + "(projections=" + str(self.projectExprs) + ")"

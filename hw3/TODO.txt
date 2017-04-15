@@ -1,0 +1,8 @@
+
+Cost Operator
+how do we know what operator we are doing 
+based on operator change how we calculate the cost
+change operator.localcost function
+how do we use sampling
+
+at each step we pick a join ordering and evaluate the cost based on selectivity
