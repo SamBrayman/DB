@@ -228,7 +228,125 @@ class Optimizer:
   # dyanmic programming algorithm. The plan cost should be compared with the
   # use of the cost model below.
   def pickJoinOrder(self, plan):
-    raise NotImplementedError
+    #raise NotImplementedError
+    relations = plan.relations()
+    expressions = {}
+    for relation in relations:
+        for elem in self.db.relationSchema(relation):
+            if( 'KEY' in elem[0]):
+                if(relation in expression):
+                    expressions[relation] = expressions[relation].append(elem[0])
+                else:
+                    expressions[relation] = [elem[0]]
+    n = len(relations)
+    for i in range(n):
+        if(i != 0 and i != 1 and i==2):
+            for j in range(n):
+                for k in range(n):
+                    #We get costs for pairs and keep the plan object for each pair
+                    #For triple we just use plan and make new join and recalc cost
+                    expr1 = ""
+                    expr2 = ""
+                    for elem in expressions[relations[i]]:
+                        if(elem[2:] in [expr[2:] for expr in expressions[relations[k]]]):
+                            expr1 = elem
+                            expr2 = expressions[relations[k]][0][0:2] + elem[2:]
+                            break
+                    if(expr1 != "" and expr2 != ""):
+                        tempplan = self.db.query().fromTable(relations[j]).join(db.query().fromTable(relations[k]),\
+                        method ='block-nested-loops', expr = expr1 + " == " + expr2)
+                        cost = self.getPlanCost(tempplan)
+                        self.addPlanCost(tempplan,cost)
+                        keySchema = DBSchema('key1', [(expr1,'int')])
+                        keySchema1 = DBSchema('key2', [(expr2,'int')])
+                        tempplan = self.db.query().fromTable(relations[j]).join(db.query().fromTable(relations[k]),\
+                        method ='hash', expr = expr1 + " == " + expr2, \
+                        lshHashFn='hash(' + expr1 + ') % 11', lhsKeySchema = keySchema, \
+                        rhsHashFn='hash(' + expr2 + ') % 11', rhsKeySchema = keySchema2)
+                        cost = self.getPlanCost(tempplan)
+                        self.addPlanCost(tempplan,cost)
+            optplan = max(self.statsCache.iteritems(), key=operator.itemgetter(1))[0]
+            self.statsCache = {}
+            j=0
+        if(i != 0 and i != 1 and i!=2):
+            for j in range(n):
+#                for k in range(n):
+                    #We get costs for pairs and keep the plan object for each pair
+                    #For triple we just use plan and make new join and recalc cost
+                    expr1 = ""
+                    expr2 = ""
+                    for elem in expressions[relations[i]]:
+                        if(elem[2:] in [expr[2:] for expr in expressions[relations[k]]]):
+                            expr1 = elem
+                            expr2 = expressions[relations[k]][0][0:2] + elem[2:]
+                            break
+                    tempplan = optplan.join(db.query().fromTable(relations[j]),\
+                    method ='block-nested-loops', expr = expr1 + " == " + expr2)
+                    cost = self.getPlanCost(tempplan)
+                    self.addPlanCost(tempplan,cost)
+                    keySchema = DBSchema('key1', [(expr1,'int')])
+                    keySchema1 = DBSchema('key2', [(expr2,'int')])
+                    tempplan = optplan.join(db.query().fromTable(relations[j]),\
+                    method ='hash', expr = expr1 + " == " + expr2, \
+                    lhsHashFn='hash(' + expr1 + ') % 11', lhsKeySchema = keySchema, \
+                    rhsHashFn='hash(' + expr2 + ') % 11', rhsKeySchema = keySchema2)
+                    cost = self.getPlanCost(tempplan)
+                    self.addPlanCost(tempplan,cost)
+            optplan = max(self.statsCache.iteritems(), key=operator.itemgetter(1))[0]
+            self.statsCache = {}
+            j=0
+    operators = self.getOrigPlan(optplan)
+    for (key,value) in operators.items():
+        if("Project" in key):
+            optplan.select(value)
+        elif("GrouBy" in key):
+            optplan.groupBy(groupSchema=value[0],aggSchema=value[1],groupExpr=value[2],aggExprs=value[3],groupHashFn=value[4])
+        elif("Select" in key):
+            optplan.where(value)
+        '''
+        elif("TableScane" in key):
+            optplan.from()
+        '''
+    return optplan
+
+
+    '''
+    if(plan.root().subPlan):
+        plan.root().subPlan = pickJoinOrder(plan.root().subPlan)
+        if("Join" in plan.root().operatorType()):
+
+        else:
+            return plan.root()
+    else:
+        if("Join" in plan.root().operatorType()):
+
+        else:
+            return plan.root()
+   '''
+
+  count = 0
+  ops = OrderedDict()
+  def getOrigPlan(self, plan,ops):
+    if(plan.subplan):
+        optype = plan.root().operatorType()
+        if(optype == "Project"):
+            ops[optype + str(count)] = plan.root().projectExprs
+            count += 1
+        elif(optype == "Select"):
+            ops[optype + str(count)] = plan.root().selectExpr
+            count += 1
+        elif(optype == "GroupBy"):
+            ops[optype + str(count)] =(plan.root().groupSchema,plan.root().aggSchema,plan.root().groupExpr,plan.root().aggExprs \
+            ,plan.root().groupHashFn)
+            count += 1
+        '''
+        elif(optype == "TableScan"):
+            ops[optype + str(count)] = (plan.root().relId, plan.root().schema)
+            count += 1
+        '''
+        ops = getOrigPlan(plan.subplan,ops)
+    return ops
+
 
   # Optimize the given query plan, returning the resulting improved plan.
   # This should perform operation pushdown, followed by join order selection.
@@ -241,3 +359,4 @@ class Optimizer:
 if __name__ == "__main__":
   import doctest
   doctest.testmod()
+
