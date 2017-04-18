@@ -60,249 +60,167 @@ class Optimizer:
   # This does not need to cascade operators, but should determine a
   # suitable ordering for selection predicates based on the cost model below.
   def pushdownOperators(self, plan):
-    #raise NotImplementedError
-    if plan:
-      planRoot = self.pushdownHelper(plan.root)
-      return Plan(root=planRoot)
+    return Plan(root=self.pushdownOperator(plan.root))
 
-
-  def pushdownHelper(self, operator):
-    #first determine operator type
-    opertorType = operator.operatorType()
-
-    if operatorType == "TableScan":
-      return operator
-    elif operatorType == "GroupBy" or operatorType == "Sort":
-      operator.subPlan = self.pushdownHelper(operator.subPlan)
-      return operator
-    elif operatorType == "UnionAll":
-      operator.lhsPlan = self.pushdownHelper(operator.lhsPlan)
-      operator.rhsPlan = self.pushdownHelper(operator.rhsPlan)
-      return operator
-    elif operatorType[-4:] == "Join":
-      operator.lhsPlan = self.pushdownHelper(operator.lhsPlan)
-      operator.rhsPlan = self.pushdownHelper(operator.rhsPlan)
-      return operator
-
-    #first check if valid operatorType
-    #if operatorType != "Project" and operatorType != "Select" and operatorType != "GroupBy" and operatorType != "Sort" and operatorType != "UnionAll" and operatorType[-4:] != "Join":
-      #return operator
-
-    elif operatorType == "Project":
-      operator.subPlan = self.pushdownHelper(operator.subPlan)
-      subplanType = operator.subPlan.operatorType()
-
-      if subplanType == "GroupBy" or subplanType = "TableScan":
-        return operator
-
-      #call second helper
-      if subplanType == "Select":
-
-        '''
-        Check keys - if not in keys, cannot pushdown anymore
-        '''
-        outAtrributes = set(operator.projectExprs.keys())
-        att = ExpressionInfo(operator.subPlan.selectExpr).getAttributes():
-        keys = operator.projectExprs.keys()
-        setKeys = set(keys)
-        op = operator
-        if att.issubset(setKeys):
-          op = operator
-          op = operator.subPlan
-          operator.subPlan = operator.subPlan.subPlan
-          op.subPlan = self.pushdownHelper(operator)
-
-        #if select not in keys:
-            #return operator
-
-        #operator.subPlan = operator.subPlan.subPlan
-        #operator.subPlan.subPlan = self.pushdownHelper(operator)
-        return op
-
-
-      #redundancy
-      elif subplanType == "Project":
-        test = [op.subPlan.projectExprs[key][0].isAttribute() for key in op.projectExprs]
-        if False not in test:
-          operator.subPlan = operator.subPlan.subPlan
-        return self.pushdownOperator(operator)
-
-
-
-      elif subplanType[-4:] == "Join":
-
-        #get keys and values
-        #items = operator.projectExprs.items()
-
-        right = operator.subPlan.rhsPlan.schema().fields
-        rightSet = set(right)
-        rightProject = {}
-
-        left = operator.subPlan.lhsPlan.schema().fields
-        leftSet = set(left)
-        leftProject = {}
-
-        anythingRemaining = False
-        #for (attribute, (expr, rand)) in items:
-        for e in operator.projectExprs:
-          pros = ExpressionInfo(operator.projectExprs[e][0]).getAttributes()
-          if pros.issubset(leftSet):
-            leftProject[e] = operator.projectExprs[e]
-          if pros.issubset(rightSet):
-            rightProject[e] = operator.projectExprs[e]
-          else:
-            anythingRemaining = True
-
-          #if leftProject:
-            #operator.subPlan.lhsPlan = self.pushdownHelper
-
-          '''
-          result = True
-          #left
-          for e in pros:
-            if e not in left:
-              result = False
-
-          # if True
-          if result:
-            leftProject[attribute] = operator.projectExprs[attribute]
-            continue
-
-          #repeat with right now
-          result = True
-          for e in pros:
-            if e not in right:
-              result = False
-
-          if result:
-            rightProject[attribute] = operator.projectExprs[attribute]
-
-        #end for
-        '''
-
-        #if left dictionary not empty
-        #remember empty dic evaluates to false
-        if leftProject:
-          lPlan = operator.subPlan.lhsPlan
-          operator.subPlan.lhsPlan = self.pushdownHelper(Project(lPlan, leftProject))
-
-        if rightProject:
-          rPlan = operator.subPlan.rhsPlan
-          operator.subPlan.rhsPlan = self.pushdownHelper(Project(rPlan, rightProject))
-
-
-        #length check - must be same size iIOT pushdown
-        #lSize = len(operator.projectExprs)
-        #rightSize = len(rightProject)
-        
-
-        #if fullSize != (rightSize + leftSize):
-          #return operator
-
-      op = operator
-      if not anythingRemaining:
-        if leftProject and rightProject:
-          op = operator.subPlan
+  def pushdownOperator(self, op):
+    if op.operatorType() == "TableScan":
       return op
-
-      #end subPlan "Join"
-
-      elif subplanType == "Sort":
-        return operator
-
-      elif subplanType == "UnionAll":
-        #subP = operator.subPlan
-        #subP
-        tempLeft = Project(operator.subPlan.lhsPlan)
-        tempRight = Project(operator.subPlan.rhsPlan)
-
-        operator.subPlan.lhsPlan = self.pushdownHelper(tempLeft, operator.projectExprs)
-        operator.subPlan.rhsPlan = self.pushdownHelper(tempRight, operator.projectExprs)
-        return operator.subPlan
-
-      #else not Join or Union
-      else:
-        #return operator
-        #erro if this happens
-        raise NotImplementedError
-
-      #return operator.subPlan
-
-    #end "Project"
-
-    #safety check above, so operatorType must be "Select"
-    elif operatorType == "Select":
-
-      #first part same as with "Project": subPlan pushdown
-      operator.subPlan = self.pushdownHelper(operator.subPlan)
-      
-      subplanType = operator.subPlan.operatorType()
-
-      if subplanType == "GroupBy" or subplanType == "TableScan" or subplanType == "Project":
-        return operator
-
-
-      if subplanType == "Sort":
-        operator.subPlan = operator.subPlan.subPlan
-        operator.subPlan.subPlan = self.pushdownHelper(operator)
-        return operator.subPlan
-
-      elif subplanType[-4:] == "Join":
-
-        selectExpress = ExpressionInfo(operator.selectExpr).decomposeCNF()
-
-
-
-        left = operator.subPlan.lhsPlan.schema().fields
-        right = operator.subPlan.rhsPlan.schema().fields
-        leftSet = set(operator.subPlan.lhsPlan.schema().fields)
-        rightSet = set(operator.subPlan.rhsPlan.schema().fields)
-        
-        
-        leftExpress = []
-        rightExpress = []
-        unpushedExpress = []
-
-        
-
-        for expr in selectExpress:
-          select = ExpressionInfo(expr).getAttributes()
-          if select.issubset(leftSet):
-            leftExpress.append(expr)
-          elif select.issubset(rightSet):
-            rightExpress.append(expr)
-          else:
-            unpushedExpress.append(expr)
-
-
-        if leftExpress:
-          newLeft = ' and '.join(leftExpress)
-          #lSelect
-          operator.subPlan.lhsPlan = self.pushdownHelper(Select(operator.subPlan.lhsPlan, newLeft))
-
-        if rightExpress:
-          newRight = ' and '.join(rightExpress)
-          op.subPlan.rhsPlan = self.pushdownHelper(Select(operator.subPlan.rhsPlan, newRight))
-
-        if unpushedExpress:
-          return Select(operator.subPlan, ' and '.join(unpushedExpress))
-        else:
-          return operator.subPlan
-
-    elif operatorType == "UnionAll":
-      operator.subPlan.lhsPlan = self.pushdownHelper(Select(operator.subPlan.lhsPlan, operator.selectExpr))
-      operator.subPlan.rhsPlan = self.pushdownHelper(Select(operator.subPlan.rhsPlan, operator.selectExpr))
-      return operator.subPlan
-
-    elif operatorType == "GroupBy" or operatorType == "Sort":
-      operator.subPlan = self.pushdownHelper(operator.subPlan)
-      return operator
-
+    elif op.operatorType() in ["GroupBy", "Sort"]:
+      op.subPlan = self.pushdownOperator(op.subPlan)
+      return op
+    elif op.operatorType() == "UnionAll" or "Join" in op.operatorType():
+      op.lhsPlan = self.pushdownOperator(op.lhsPlan)
+      op.rhsPlan = self.pushdownOperator(op.rhsPlan)
+      return op
+    elif op.operatorType() == "Project":
+      return self.pushdownProject(op)
+    elif op.operatorType() == "Select":
+      return self.pushdownSelect(op)
     else:
+      print("Unmatched operatorType in pushdownOperator(): " + op.operatorType())
       raise NotImplementedError
 
-    #else:
-      #return operator
+  def pushdownProject(self, op):
+    # First pushdown operators below:
+    op.subPlan = self.pushdownOperator(op.subPlan)
+
+    if op.subPlan.operatorType() in ["GroupBy", "TableScan"]:
+      return op
+
+    elif op.subPlan.operatorType() == "Project":
+      # Attempt to remove redundant projections:
+      bools = [op.subPlan.projectExprs[key][0].isAttribute() for key in op.projectExprs]
+      if False not in bools:
+        op.subPlan = op.subPlan.subPlan
+      return self.pushdownOperator(op)
+
+    elif op.subPlan.operatorType() == "Select":
+      # Move op below its subplan if op provides all attributes needed for the selectExpr
+      selectAttrs = ExpressionInfo(op.subPlan.selectExpr).getAttributes()
+      outputAttrs = set(op.projectExprs.keys())
+      result = op
+      if selectAttrs.issubset(outputAttrs):
+        result = op.subPlan
+        op.subPlan = result.subPlan
+        result.subPlan = self.pushdownOperator(op)
+      return result
+
+    elif op.subPlan.operatorType() == "Sort":
+      # TODO
+      return op
+
+    elif op.subPlan.operatorType() == "UnionAll":
+      # Place a copy of op on each side of the union
+      result = op.subPlan
+      result.lhsPlan = self.pushdownOperator(Project(result.lhsPlan, op.projectExprs))
+      result.rhsPlan = self.pushdownOperator(Project(result.rhsPlan, op.projectExprs))
+      return result
+
+    elif "Join" in op.subPlan.operatorType():
+      # Partition the projections among the input relations, as much as possible
+      lhsAttrs = set(op.subPlan.lhsPlan.schema().fields)
+      rhsAttrs = set(op.subPlan.rhsPlan.schema().fields)
+      lhsProjectExprs = {}
+      rhsProjectExprs = {}
+      remainingProjectExprs = False
+
+      for attr in op.projectExprs:
+        requiredAttrs = ExpressionInfo(op.projectExprs[attr][0]).getAttributes()
+        if requiredAttrs.issubset(lhsAttrs):
+          lhsProjectExprs[attr] = op.projectExprs[attr]
+        elif requiredAttrs.issubset(rhsAttrs):
+          rhsProjectExprs[attr] = op.projectExprs[attr]
+        else:
+          remainingProjectExprs = True
+
+      if lhsProjectExprs:
+        op.subPlan.lhsPlan = self.pushdownOperator(Project(op.subPlan.lhsPlan, lhsProjectExprs))
+      if rhsProjectExprs:
+        op.subPlan.rhsPlan = self.pushdownOperator(Project(op.subPlan.rhsPlan, rhsProjectExprs))
+
+      result = op
+      # Remove op from the tree if there are no remaining project expressions, and each side of the join recieved a projection
+      if not remainingProjectExprs and lhsProjectExprs and rhsProjectExprs:
+        result = op.subPlan
+      return result
+    else:
+      print("Unmatched operatorType in pushdownOperator(): " + op.operatorType())
+      raise NotImplementedError
+
+  def pushdownSelect(self, op):
+    # First pushdown operators below:
+    op.subPlan = self.pushdownOperator(op.subPlan)
+
+    if op.subPlan.operatorType() in ["GroupBy", "TableScan", "Project"]:
+      return op
+
+    elif op.subPlan.operatorType() == "Select":
+      # Reorder two selects based on 'score'
+      useEstimated = True
+      opScore = (1 - op.selectivity(useEstimated)) / op.tupleCost
+      childScore = (1 - op.subPlan.selectivity(useEstimated)) / op.tupleCost
+
+      result = op
+      if childScore > myScore:
+        result = op.subPlan
+        op.subPlan = result.subPlan
+        result.subPlan = self.pushdownOperator(op)
+      return result
+
+    elif op.subPlan.operatorType() == "Sort":
+      # Always move a select below a sort
+      result = op.subPlan
+      op.subPlan = result.subPlan
+      result.subPlan = self.pushdownOperator(op)
+      return result
+
+    elif op.subPlan.operatorType() == "UnionAll":
+      # Place a copy of op on each side of the union
+      result = op.subPlan
+      result.lhsPlan = self.pushdownOperator(Select(result.lhsPlan, op.selectExpr))
+      result.rhsPlan = self.pushdownOperator(Select(result.rhsPlan, op.selectExpr))
+      return result
+
+    elif "Join" in op.subPlan.operatorType():
+      # Partition the select expr as much as possible
+      exprs = ExpressionInfo(op.selectExpr).decomposeCNF()
+      lhsExprs = []
+      rhsExprs = []
+      remainingExprs = []
+
+      lhsAttrs = set(op.subPlan.lhsPlan.schema().fields)
+      rhsAttrs = set(op.subPlan.rhsPlan.schema().fields)
+
+      for e in exprs:
+        attrs = ExpressionInfo(e).getAttributes()
+        if attrs.issubset(lhsAttrs):
+          lhsExprs.append(e)
+        elif attrs.issubset(rhsAttrs):
+          rhsExprs.append(e)
+        else:
+          remainingExprs.append(e)
+
+      if lhsExprs:
+        newLhsExpr = ' and '.join(lhsExprs)
+        lhsSelect = Select(op.subPlan.lhsPlan, newLhsExpr)
+        op.subPlan.lhsPlan = self.pushdownOperator(lhsSelect)
+
+      if rhsExprs:
+        newRhsExpr = ' and '.join(rhsExprs)
+        rhsSelect = Select(op.subPlan.rhsPlan, newRhsExpr)
+        op.subPlan.rhsPlan = self.pushdownOperator(rhsSelect)
+
+      result = None
+      if remainingExprs:
+        newExpr = ' and '.join(remainingExprs)
+        result = Select(op.subPlan, newExpr)
+      else:
+        result = op.subPlan
+
+      return result
+    else:
+      print("Unmatched operatorType in pushdownOperator(): " + op.operatorType())
+      raise NotImplementedError
 
   # Returns an optimized query plan with joins ordered via a System-R style
   # dyanmic programming algorithm. The plan cost should be compared with the
