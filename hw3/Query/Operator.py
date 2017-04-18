@@ -155,7 +155,7 @@ class Operator:
 
   # Returns this operator's selectivity, either as an estimate or
   # a profiled actual selectivity.
-  def selectivit(self, estimated):
+  def selectivity(self, estimated):
     numInputs = sum(map(lambda x: x.cardinality(estimated), self.inputs()))
     numOutputs = self.cardinality(estimated)
     return numOutputs / numInputs
@@ -196,12 +196,12 @@ class Operator:
         numPages = numInputs / self.storage.bufferPool.pageSize
         #Assume 1 second for seek
         blocks = numPages / self.bufferPool.poolSize
-        return  1 + (blocks * self.tupleCost)  
+        return  1 + (blocks * self.tupleCost)
     elif self.operatorType() == "UnionAll":
         numPages = numInputs / self.storage.bufferPool.pageSize
         #Assume 1 second for seek
         blocks = numPages / self.bufferPool.poolSize
-        return  2 + (blocks * self.tupleCost) 
+        return  2 + (blocks * self.tupleCost)
     elif self.operatorType() == "Select":
         #Assume worst case relation doesn't fit in memory
         numPages = numInputs / self.storage.bufferPool.pageSize

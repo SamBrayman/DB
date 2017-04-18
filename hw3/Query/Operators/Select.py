@@ -90,6 +90,12 @@ class Select(Operator):
 
 
   # Plan and statistics information
+  # Returns this operator's selectivity, either as an estimate or
+  # a profiled actual selectivity.
+  def selectivity(self, estimated):
+    numInputs = sum(map(lambda x: x.cardinality(estimated), self.inputs()))
+    numOutputs = self.cardinality(estimated)
+    return numOutputs / numInputs
 
   # Returns a single line description of the operator.
   def cost(self,estimated):

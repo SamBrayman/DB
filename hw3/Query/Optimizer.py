@@ -5,7 +5,7 @@ from Query.Operators.Join import Join
 from Query.Operators.Project import Project
 from Query.Operators.Select import Select
 from Utils.ExpressionInfo import ExpressionInfo
-from Collections import OrderedDict
+from collections import OrderedDict
 
 class Optimizer:
   """
@@ -49,11 +49,11 @@ class Optimizer:
 
   # Caches the cost of a plan computed during query optimization.
   def addPlanCost(self, plan, cost):
-    raise NotImplementedError
+    self.statsCache[plan] = cost
 
   # Checks if we have already computed the cost of this plan.
   def getPlanCost(self, plan):
-    raise NotImplementedError
+    return plan.cost(true)
 
   # Given a plan, return an optimized plan with both selection and
   # projection operations pushed down to their nearest defining relation
@@ -92,7 +92,7 @@ class Optimizer:
       operator.subPlan = self.pushdownHelper(operator.subPlan)
       subplanType = operator.subPlan.operatorType()
 
-      if subplanType == "GroupBy" or subplanType = "TableScan":
+      if subplanType == "GroupBy" or subplanType == "TableScan":
         return operator
 
       #call second helper
@@ -102,7 +102,7 @@ class Optimizer:
         Check keys - if not in keys, cannot pushdown anymore
         '''
         outAtrributes = set(operator.projectExprs.keys())
-        att = ExpressionInfo(operator.subPlan.selectExpr).getAttributes():
+        att = ExpressionInfo(operator.subPlan.selectExpr).getAttributes()
         keys = operator.projectExprs.keys()
         setKeys = set(keys)
         op = operator
@@ -194,7 +194,7 @@ class Optimizer:
         #length check - must be same size iIOT pushdown
         #lSize = len(operator.projectExprs)
         #rightSize = len(rightProject)
-        
+
 
         #if fullSize != (rightSize + leftSize):
           #return operator
@@ -203,7 +203,7 @@ class Optimizer:
       if not anythingRemaining:
         if leftProject and rightProject:
           op = operator.subPlan
-      return op
+        return op
 
       #end subPlan "Join"
 
@@ -221,10 +221,10 @@ class Optimizer:
         return operator.subPlan
 
       #else not Join or Union
-      else:
+      #else:
         #return operator
         #erro if this happens
-        raise NotImplementedError
+        #raise NotImplementedError
 
       #return operator.subPlan
 
@@ -235,7 +235,7 @@ class Optimizer:
 
       #first part same as with "Project": subPlan pushdown
       operator.subPlan = self.pushdownHelper(operator.subPlan)
-      
+
       subplanType = operator.subPlan.operatorType()
 
       if subplanType == "GroupBy" or subplanType == "TableScan" or subplanType == "Project":
@@ -263,13 +263,13 @@ class Optimizer:
         right = operator.subPlan.rhsPlan.schema().fields
         leftSet = set(operator.subPlan.lhsPlan.schema().fields)
         rightSet = set(operator.subPlan.rhsPlan.schema().fields)
-        
-        
+
+
         leftExpress = []
         rightExpress = []
         unpushedExpress = []
 
-        
+
 
         for expr in selectExpress:
           select = ExpressionInfo(expr).getAttributes()
@@ -304,8 +304,8 @@ class Optimizer:
       operator.subPlan = self.pushdownHelper(operator.subPlan)
       return operator
 
-    else:
-      raise NotImplementedError
+    #else:
+      #raise NotImplementedError
 
     #else:
       #return operator
@@ -318,13 +318,28 @@ class Optimizer:
     relations = plan.relations()
     expressions = {}
     for relation in relations:
-        for elem in self.db.relationSchema(relation):
-            if( 'KEY' in elem[0]):
-                if(relation in expression):
-                    expressions[relation] = expressions[relation].append(elem[0])
+        for elem in self.db.relationSchema(relation).fields:
+            if( 'KEY' in elem):
+                if(relation in expressions):
+                    #print(expressions)
+                    #print(relation)
+                    #print(elem)
+                    expressions[relation].append(elem)
+                    #print(expressions)
+                    #print(relation)
+                    #print(elem)
                 else:
-                    expressions[relation] = [elem[0]]
+                    #print(expressions)
+                    #print(relation)
+                    #print(elem)
+                    expressions[relation] = [elem]
+                    #print(expressions)
+                    #print(relation)
+                    #print(elem)
     n = len(relations)
+    if(n == 1):
+        return plan
+    optplan = None
     for i in range(n):
         if(i != 0 and i != 1 and i==2):
             for j in range(n):
@@ -334,6 +349,8 @@ class Optimizer:
                     expr1 = ""
                     expr2 = ""
                     for elem in expressions[relations[i]]:
+                        print(elem)
+                        print([expr[2:] for expr in expressions[relations[k]]])
                         if(elem[2:] in [expr[2:] for expr in expressions[relations[k]]]):
                             expr1 = elem
                             expr2 = expressions[relations[k]][0][0:2] + elem[2:]
@@ -352,6 +369,7 @@ class Optimizer:
                         cost = self.getPlanCost(tempplan)
                         self.addPlanCost(tempplan,cost)
             optplan = max(self.statsCache.iteritems(), key=operator.itemgetter(1))[0]
+            print(optplan)
             self.statsCache = {}
             j=0
         if(i != 0 and i != 1 and i!=2):
@@ -379,21 +397,25 @@ class Optimizer:
                     cost = self.getPlanCost(tempplan)
                     self.addPlanCost(tempplan,cost)
             optplan = max(self.statsCache.iteritems(), key=operator.itemgetter(1))[0]
+            print(optplan)
             self.statsCache = {}
             j=0
-    operators = self.getOrigPlan(optplan)
-    for (key,value) in operators.items():
-        if("Project" in key):
-            optplan.select(value)
-        elif("GrouBy" in key):
-            optplan.groupBy(groupSchema=value[0],aggSchema=value[1],groupExpr=value[2],aggExprs=value[3],groupHashFn=value[4])
-        elif("Select" in key):
-            optplan.where(value)
-        '''
-        elif("TableScane" in key):
-            optplan.from()
-        '''
-    return optplan
+    if(optplan != None):
+        operators = self.getOrigPlan(optplan)
+        for (key,value) in operators.items():
+            if("Project" in key):
+                optplan.select(value)
+            elif("GrouBy" in key):
+                optplan.groupBy(groupSchema=value[0],aggSchema=value[1],groupExpr=value[2],aggExprs=value[3],groupHashFn=value[4])
+            elif("Select" in key):
+                optplan.where(value)
+        #'''
+        #elif("TableScane" in key):
+        #    optplan.from()
+        #'''
+        return optplan
+
+
 
 
     '''

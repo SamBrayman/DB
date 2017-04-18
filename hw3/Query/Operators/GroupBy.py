@@ -166,9 +166,11 @@ class GroupBy(Operator):
   def localCost(self,estimated):
     numInputs = sum(map(lambda x: x.cardinality(estimated), self.inputs()))
     numPages = numInputs / self.storage.bufferPool.pageSize
-    #Assume 1 second for seek
+    #Assume 1 second for seek assuming no index
     blocks = numPages / self.bufferPool.poolSize
-    return  1 + (blocks * self.tupleCost)
+    #Put the data into blocks
+    #Aggregate over each block
+    return  1 + (2*(blocks * self.tupleCost))
 
   # Returns a single line description of the operator.
   def explain(self):
