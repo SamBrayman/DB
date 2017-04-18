@@ -5,6 +5,7 @@ from Query.Operators.Join import Join
 from Query.Operators.Project import Project
 from Query.Operators.Select import Select
 from Utils.ExpressionInfo import ExpressionInfo
+from Collections import OrderedDict
 
 class Optimizer:
   """
