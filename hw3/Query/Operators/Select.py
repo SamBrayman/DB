@@ -99,14 +99,16 @@ class Select(Operator):
 
   # Returns a single line description of the operator.
   def cost(self,estimated):
-      super().cost(estimated)
+      #super().cost(estimated)
+      subPlanCost = sum(map(lambda x: x.cost(estimated), self.inputs()))
+      return self.localCost(estimated) + subPlanCost
 
   def localCost(self,estimated):
       numInputs = sum(map(lambda x: x.cardinality(estimated), self.inputs()))
       #Assume worst case relation doesn't fit in memory
       numPages = numInputs / self.storage.bufferPool.pageSize
       #Assume 1 second for seek
-      blocks = numPages / self.bufferPool.poolSize
+      blocks = numPages / self.storage.bufferPool.poolSize
       if ("=" in self.selectExpr and "<" not in self.selectExpr and ">" not in self.selectExpr):
           return 1 + ((blocks / 2) * self.tupleCost)
       else:

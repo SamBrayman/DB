@@ -104,7 +104,8 @@ class Project(Operator):
 
   # Plan and statistics information
   def cost(self,estimated):
-      super().cost(estimated)
+     subPlanCost = sum(map(lambda x: x.cost(estimated), self.inputs()))
+     return self.localCost(estimated) + subPlanCost
 
   def localCost(self,estimated):
      numInputs = sum(map(lambda x: x.cardinality(estimated), self.inputs()))

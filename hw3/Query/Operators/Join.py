@@ -47,7 +47,7 @@ class Join(Operator):
                        self.joinMethod, \
                        self.lhsSchema, self.rhsSchema ] \
                        + methodParams
-
+    #print(requireAllValid)
     if any(map(lambda x: x is None, requireAllValid)):
       raise ValueError("Incomplete join specification, missing join operator parameter")
 
@@ -340,7 +340,9 @@ class Join(Operator):
 
   # Plan and statistics information
   def cost(self, estimated):
-      super().cost(estimated)
+      #super().cost(estimated)
+      subPlanCost = sum(map(lambda x: x.cost(estimated), self.inputs()))
+      return self.localCost(estimated) + subPlanCost
 
   def localCost(self, estimated):
     numInputs = sum(map(lambda x: x.cardinality(estimated), self.inputs()))
