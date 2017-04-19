@@ -318,6 +318,7 @@ class Optimizer:
 
 
   def getOrigPlan(self, plan,ops,count):
+    '''
     print(ops)
     if(plan.root.operatorType() != "TableScan" and "Join" not in plan.root.operatorType() and plan.root.subPlan):
         optype = plan.root.operatorType()
@@ -335,11 +336,37 @@ class Optimizer:
             ,plan.root.groupHashFn)
             count += 1
             ops = self.getOrigPlan(plan.root.subPlan,ops,count)
-        '''
+
         elif(optype == "TableScan"):
             ops[optype + str(count)] = (plan.root().relId, plan.root().schema)
             count += 1
-        '''
+
+    '''
+    '''
+    string = plan.explain()
+    for line in string:
+        optype = line[0:line.index("[")]
+        if(optype == "Project"):
+            ops[optype + str(count)] = line[line.index("{"):line.index("}")]
+        if(optype == "Select"):
+            ops[optype + str(count)] = line[line.index("\'"):line[index("\'") + 1:].index("\'")]
+        if(optype == "GroupBy"):
+            atts = line[line.index("[") + 1:]
+            groupSchema = atts[atts.index("=") + 1 : atts.index(", aggschema")]
+            atts = atts[atts.index(", aggschema"):]
+    '''
+    for elem in plan.flatten():
+        optype = elem[1]
+        if(optype == "Project"):
+            ops[optype + str(count)] = elem[1].projectExprs
+            count += 1
+        elif(optype == "Select"):
+            ops[optype + str(count)] = elem[1].selectExpr
+            count += 1
+        elif(optype == "GroupBy"):
+            ops[optype + str(count)] =(elem[1].groupSchema,elem[1].aggSchema,elem[1].groupExpr,elem[1].aggExprs \
+            ,elem[1].groupHashFn)
+            count += 1
 
     return ops
 
