@@ -412,10 +412,10 @@ class WorkloadGenerator:
       #query2 = db.query().fromTable(relations[1]).where('O_ORDERDATE >= 19940101')
       #query2 = query2.where('O_ORDERDATE < 19950101')
       query3 = db.query().fromTable(relations[5]).where('R_NAME == \'ASIA\'')
-      query3 = db.query().fromTable(relations[4]).join(\
+      query3 = db.query().fromTable(relations[3]).join(\
               query3,\
               method='block-nested-loops',expr='N_REGIONKEY == R_REGIONKEY')
-      query3 = db.query().fromTable(relations[3]).join(\
+      query3 = db.query().fromTable(relations[4]).join(\
               query3,\
               method='block-nested-loops',expr='S_NATIONKEY == N_NATIONKEY')
       query3 = db.query().fromTable(relations[0]).join(\

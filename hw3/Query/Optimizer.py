@@ -432,7 +432,7 @@ class Optimizer:
                             rhsHashFn='hash(' + expr2 + ') % 11', rhsKeySchema = keySchema1)
                             cost = self.getPlanCost(tempplan)
                             self.addPlanCost(tempplan,cost)
-            optplan = max(self.statsCache.items(), key=operator.itemgetter(1))[0]
+            optplan = min(self.statsCache.items(), key=operator.itemgetter(1))[0]
             #print(optplan)
             self.statsCache = {}
             j=0 #Reset j for next loop
@@ -478,7 +478,7 @@ class Optimizer:
                                 #print(self.statsCache)
                                 expr1 = ""
                                 expr2 = ""
-            optplan = max(self.statsCache.items(), key=operator.itemgetter(1))[0]
+            optplan = min(self.statsCache.items(), key=operator.itemgetter(1))[0]
             #print(optplan)
             self.statsCache = {}
             j=0
