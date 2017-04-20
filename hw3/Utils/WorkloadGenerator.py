@@ -305,18 +305,17 @@ class WorkloadGenerator:
       query = query.finalize()
       #query2.finalize()
       nameSchema = DBSchema('atts', [('L_EXTENDEDPRICE','double'),('L_DISCOUNT','double')])
-      print(query.explain())
+      #print(query.explain())
       if(opt):
           #query = db.optimizer.pushdownOperators(query)
           #print(query)
           query = db.optimizer.pickJoinOrder(query)
           #print(query)
-          print(query.explain())
-          print(query.schema().unpack(tup) for page in db.processQuery(query) for tup in page[1])
+          #print(query.explain())
+          #print(query.schema().unpack(tup) for page in db.processQuery(query) for tup in page[1])
           results = [query.schema().unpack(tup) for page in db.processQuery(query) for tup in page[1] ]
       else:
           results = [query.schema().unpack(tup) for page in db.processQuery(query) for tup in page[1] ]
-
           #print(results)
       sumLEPLD = 0.0
       for tup in results:
@@ -348,7 +347,7 @@ class WorkloadGenerator:
               aggExprs=[(0,lambda acc,e: e.L_EXTENDEDPRICE * (1-e.L_DISCOUNT),lambda x:x)],\
               groupHashFn=(lambda gbVal: hash((gbVal[0] + gbVal[1] + gbVal[2]) % 10))).finalize()
       if(opt):
-          query = db.optimizer.pushdownOperators(query)
+          #query = db.optimizer.pushdownOperators(query)
           query = db.optimizer.pickJoinOrder(query)
 
           results = [query.schema().unpack(tup) for page in db.processQuery(query) for tup in page[1] ]
@@ -389,10 +388,9 @@ class WorkloadGenerator:
               aggSchema =aggrSchema,\
               groupExpr=(lambda e: (e.C_CUSTKEY,e.C_NAME,e.C_ACCTBAL,e.C_PHONE,e.N_NAME,e.C_ADDRESS,e.C_COMMENT)),\
               aggExprs=[(0,lambda acc,e: e.L_EXTENDEDPRICE * (1-e.L_DISCOUNT),lambda x:x)],\
-              groupHashFn=(lambda gbVal: hash((gbVal[0] + gbVal[1] + gbVal[2] + gbVal[3] + \
-              gbVal[4] + gbVal[5] + gbVal[6]) % 10))).finalize()
+              groupHashFn=(lambda gbVal: hash((gbVal[0]) % 10))).finalize()
       if(opt):
-          query = db.optimizer.pushdownOperators(query)
+          #query = db.optimizer.pushdownOperators(query)
           query = db.optimizer.pickJoinOrder(query)
 
           results = [query.schema().unpack(tup) for page in db.processQuery(query) for tup in page[1] ]
@@ -440,7 +438,7 @@ class WorkloadGenerator:
               aggExprs=[(0,lambda acc,e: e.L_EXTENDEDPRICE * (1-e.L_DISCOUNT),lambda x:x)],\
               groupHashFn=(lambda gbVal: hash((gbVal[0]) % 10))).finalize()
       if(opt):
-          query3 = db.optimizer.pushdownOperators(query3)
+          #query3 = db.optimizer.pushdownOperators(query3)
           query3 = db.optimizer.pickJoinOrder(query3)
 
           results = [query.schema().unpack(tup) for page in db.processQuery(query3) for tup in page[1] ]

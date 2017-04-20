@@ -356,7 +356,8 @@ class Optimizer:
             atts = atts[atts.index(", aggschema"):]
     '''
     for elem in plan.flatten():
-        optype = elem[1]
+        optype = elem[1].operatorType()
+        #print(optype)
         if(optype == "Project"):
             ops[optype + str(count)] = elem[1].projectExprs
             count += 1
@@ -400,7 +401,7 @@ class Optimizer:
     if(n == 1):
         return plan
     optplan = None
-    for i in range(n):
+    for i in range(n-1):
         if(i == 0 ):
             for j in range(n):
                 for k in range(n):
@@ -436,6 +437,11 @@ class Optimizer:
             self.statsCache = {}
             j=0 #Reset j for next loop
         if(i != 0 and n != 2):
+            currrelations = optplan.finalize().relations()
+            elements = []
+            for relation in currrelations:
+                for expr in expressions[relation]:
+                    elements.append(expr)
             for j in range(n):
 #                for k in range(n):
                     #We get costs for pairs and keep the plan object for each pair
@@ -443,25 +449,37 @@ class Optimizer:
                     expr1 = ""
                     expr2 = ""
                     #Find if there is a possible join expression between the two relations
-                    for elem in [expressions[relation] for relation in optplan.finalize().relations()]:
-                        if(elem[2:] in [expr[2:] for expr in expressions[relations[j]]]):
-                            expr1 = elem
-                            expr2 = expressions[relations[k]][0][0:2] + elem[2:]
-                    if(expr1 != "" and expr2 != ""):
-                        tempplan = optplan.join(self.db.query().fromTable(relations[j]),\
-                        method ='block-nested-loops', expr = expr1 + " == " + expr2)
-                        cost = self.getPlanCost(tempplan)
-                        self.addPlanCost(tempplan,cost)
-                        keySchema = DBSchema('key1', [(expr1,'int')])
-                        keySchema1 = DBSchema('key2', [(expr2,'int')])
-                        tempplan = optplan.join(self.db.query().fromTable(relations[j]),\
-                        method ='hash', expr = expr1 + " == " + expr2, \
-                        lhsHashFn='hash(' + expr1 + ') % 11', lhsKeySchema = keySchema,rhsSchema = self.db.relationSchema(relations[j]), \
-                        rhsHashFn='hash(' + expr2 + ') % 11', rhsKeySchema = keySchema1)
-                        cost = self.getPlanCost(tempplan)
-                        self.addPlanCost(tempplan,cost)
+                    #print([relation for relation in currrelations])
+                    #print(expressions[relations[j]])
+#                    for relation in optplan.finalize().relations():
+                    if(relations[j] not in currrelations):
+                        for elem in elements:
+                            #print(elem[2:])
+                            #print([expr[2:] for expr in expressions[relations[j]]])
+                            if(elem[2:] in [expr[2:] for expr in expressions[relations[j]]] and elem not in [expr for expr in expressions[relations[j]]]):
+                                expr1 = elem
+                                expr2 = expressions[relations[j]][0][0:2] + elem[2:]
+                            #print(expr1)
+                            #print(expr2)
+                            if(expr1 != "" and expr2 != ""):
+                                tempplan = optplan.join(self.db.query().fromTable(relations[j]),\
+                                method ='block-nested-loops', expr = expr1 + " == " + expr2)
+                                cost = self.getPlanCost(tempplan)
+                                self.addPlanCost(tempplan,cost)
+                                #print(self.statsCache)
+                                keySchema = DBSchema('key1', [(expr1,'int')])
+                                keySchema1 = DBSchema('key2', [(expr2,'int')])
+                                tempplan = optplan.join(self.db.query().fromTable(relations[j]),\
+                                method ='hash', expr = expr1 + " == " + expr2, \
+                                lhsHashFn='hash(' + expr1 + ') % 11', lhsKeySchema = keySchema,rhsSchema = self.db.relationSchema(relations[j]), \
+                                rhsHashFn='hash(' + expr2 + ') % 11', rhsKeySchema = keySchema1)
+                                cost = self.getPlanCost(tempplan)
+                                self.addPlanCost(tempplan,cost)
+                                #print(self.statsCache)
+                                expr1 = ""
+                                expr2 = ""
             optplan = max(self.statsCache.items(), key=operator.itemgetter(1))[0]
-            print(optplan)
+            #print(optplan)
             self.statsCache = {}
             j=0
     #print(optplan)
@@ -469,16 +487,16 @@ class Optimizer:
     count =0
     if(optplan != None):
         operators = self.getOrigPlan(plan,ops,count)
-        print(operators)
-        for (key,value) in operators.items():
+        #print(reversed(list(operators.items())))
+        for (key,value) in reversed(list(operators.items())):
             if("Project" in key):
-                optplan.select(value)
-                print(optplan)
+                optplan = optplan.select(value)
+                #print(optplan)
             elif("GroupBy" in key):
-                optplan.groupBy(groupSchema=value[0],aggSchema=value[1],groupExpr=value[2],aggExprs=value[3],groupHashFn=value[4])
+                optplan = optplan.groupBy(groupSchema=value[0],aggSchema=value[1],groupExpr=value[2],aggExprs=value[3],groupHashFn=value[4])
             elif("Select" in key):
-                optplan.where(selectExpr =value)
-                print(optplan)
+                optplan = optplan.where(value)
+                #print(optplan)
         #'''
         #elif("TableScane" in key):
         #    optplan.from()

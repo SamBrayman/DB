@@ -78,7 +78,7 @@ class BufferPool:
 
   def hasPage(self, pageId):
     return pageId in self.pageMap
-  
+
   # Gets a page from the buffer pool if present, otherwise reads it from a heap file.
   # This method returns both the page, as well as a boolean to indicate whether
   # there was a cache hit.
@@ -96,11 +96,11 @@ class BufferPool:
         offset     = self.freeList.pop(0)
         pageBuffer = self.pool.getbuffer()[offset:offset+self.pageSize]
         page       = self.fileMgr.readPage(pageId, pageBuffer)
-        
+
         self.pageMap[pageId] = (offset, page, 1 if pinned else 0)
         self.pageMap.move_to_end(pageId)
         return (page, False)
-    
+
     else:
       raise ValueError("Uninitalized buffer pool, no file manager found")
 
@@ -138,7 +138,7 @@ class BufferPool:
     (offset, page, pinCount) = self.pageMap[pageId]
     self.pageMap[pageId] = (offset, page, pinCount+delta)
 
-  # Removes a page from the page map, returning it to the free 
+  # Removes a page from the page map, returning it to the free
   # page list without flushing the page to the disk.
   def discardPage(self, pageId):
     if self.hasPage(pageId):
@@ -148,7 +148,7 @@ class BufferPool:
         self.freeListLen += 1
         del self.pageMap[pageId]
 
-  # Removes a page from the page map, returning it to the free 
+  # Removes a page from the page map, returning it to the free
   # page list. This method also flushes the page to disk.
   def flushPage(self, pageId):
     if self.fileMgr:
@@ -183,7 +183,7 @@ class BufferPool:
         raise ValueError("Could not find a page to evict in the buffer pool")
 
   def clear(self):
-    for (pageId, (offset, page, _)) in self.pageMap.items():
+    for (pageId, (offset, page, _)) in list(self.pageMap.items()):
       if page.isDirty():
         self.flushPage(pageId)
 

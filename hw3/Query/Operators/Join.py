@@ -313,7 +313,8 @@ class Join(Operator):
     # Create a partition file as needed.
     if not self.storage.hasRelation(partRelId):
       self.storage.createRelation(partRelId, partSchema)
-      self.partitionFiles[int(left)][partitionId] = partRelId
+      #self.partitionFiles[int(left)][partitionId] = partRelId
+      self.partitionFiles[1 - int(left)][partitionId] = partRelId
 
     partFile = self.storage.fileMgr.relationFile(partRelId)[1]
     if partFile:
@@ -357,6 +358,8 @@ class Join(Operator):
         #Assume RHS is 75% of Tuples
         numPagesS = numPages * .75
         numPagesR = numPages * .25
+        if(numPages == 0):
+            return 1
         return numPagesR + (numPagesR / ((self.storage.bufferPool.poolSize - 2) * numPagesS))
     elif self.operatorType() == "IndexJoin":
         numPages = numInputs / self.storage.bufferPool.pageSize
@@ -365,6 +368,8 @@ class Join(Operator):
         return numPages + (self.tupleCost * (kP + indexP))
     elif self.operatorType() == "HashJoin":
         numPages = numInputs / self.storage.bufferPool.pageSize
+        if(numPages == 0):
+            return 1
         #Assume RHS is 75% of Tuples
         numPagesS = numPages * .75
         numPagesR = numPages * .25
