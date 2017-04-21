@@ -144,9 +144,9 @@ class BushyOptimizer(Optimizer):
                         testPlan = Plan(root=j)
 
                         testPlan.prepare(self.db)
-                        #Sampling involves way too much overhead....
-
-                        #testPlan.sample(1.0)
+                        
+                        #Sampling involves a lot of overhead....
+                        testPlan.sample(1.0)
 
                         currCost = self.getPlanCost(plan)
                         if currCost is None:
