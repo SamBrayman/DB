@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 plt.xlabel('Query Plans')
-plt.ylabel('Elapsed Time')
+plt.ylabel('Elapsed Time (s)')
 plt.title('Comparison of Optimization to Non-Optimization')
 '''
 query1
@@ -25,10 +25,10 @@ Execution time: 1097.5430915355682
 query5 Optimized
 Execution time: 7.205395698547363
 '''
-queries = ('1', '2', '3', '4')#,'5')
+queries = ('1', '2', '3', '4','5')
 y_pos = np.arange(len(queries))
-performance = [0.43109703063964844,0.3919703960418701,21.9739191532135,0.038863182067871094]#,1097.5430915355682]
-performance2 = [0.44269347190856934,1.1067113876342773,4.479973077774048,4.2490010261535645]#,7.205395698547363]
+performance = [0.43109703063964844,0.3919703960418701,21.9739191532135,0.038863182067871094,1097.5430915355682]
+performance2 = [0.44269347190856934,1.1067113876342773,4.479973077774048,4.2490010261535645,7.205395698547363]
 
 
 
