@@ -276,7 +276,7 @@ class WorkloadGenerator:
       query = query.finalize()
       nameSchema = DBSchema('atts', [('L_EXTENDEDPRICE','double'),('L_DISCOUNT','double')])
       if(opt):
-          query = db.optimizer.pushdownOperators(query)
+          db.optimizer.pushdownOperators(query)
           query = db.optimizer.pickJoinOrder(query)
           results = [nameSchema.unpack(tup) for page in db.processQuery(query) for tup in page[1] ]
       else:
@@ -307,7 +307,7 @@ class WorkloadGenerator:
       nameSchema = DBSchema('atts', [('L_EXTENDEDPRICE','double'),('L_DISCOUNT','double')])
       #print(query.explain())
       if(opt):
-          #query = db.optimizer.pushdownOperators(query)
+          db.optimizer.pushdownOperators(query)
           #print(query)
           query = db.optimizer.pickJoinOrder(query)
           #print(query)
@@ -347,7 +347,7 @@ class WorkloadGenerator:
               aggExprs=[(0,lambda acc,e: e.L_EXTENDEDPRICE * (1-e.L_DISCOUNT),lambda x:x)],\
               groupHashFn=(lambda gbVal: hash((gbVal[0] + gbVal[1] + gbVal[2]) % 10))).finalize()
       if(opt):
-          #query = db.optimizer.pushdownOperators(query)
+          db.optimizer.pushdownOperators(query)
           query = db.optimizer.pickJoinOrder(query)
 
           results = [query.schema().unpack(tup) for page in db.processQuery(query) for tup in page[1] ]
@@ -390,7 +390,7 @@ class WorkloadGenerator:
               aggExprs=[(0,lambda acc,e: e.L_EXTENDEDPRICE * (1-e.L_DISCOUNT),lambda x:x)],\
               groupHashFn=(lambda gbVal: hash((gbVal[0]) % 10))).finalize()
       if(opt):
-          #query = db.optimizer.pushdownOperators(query)
+          db.optimizer.pushdownOperators(query)
           query = db.optimizer.pickJoinOrder(query)
 
           results = [query.schema().unpack(tup) for page in db.processQuery(query) for tup in page[1] ]
@@ -438,7 +438,7 @@ class WorkloadGenerator:
               aggExprs=[(0,lambda acc,e: e.L_EXTENDEDPRICE * (1-e.L_DISCOUNT),lambda x:x)],\
               groupHashFn=(lambda gbVal: hash((gbVal[0]) % 10))).finalize()
       if(opt):
-          #query3 = db.optimizer.pushdownOperators(query3)
+          db.optimizer.pushdownOperators(query3)
           query3 = db.optimizer.pickJoinOrder(query3)
 
           results = [query.schema().unpack(tup) for page in db.processQuery(query3) for tup in page[1] ]
