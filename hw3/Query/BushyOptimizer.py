@@ -1,5 +1,4 @@
 import itertools
-
 from Query.Optimizer import Optimizer
 from Query.Plan import Plan
 from Query.Operators.Join import Join
@@ -7,7 +6,7 @@ from Query.Operators.Project import Project
 from Query.Operators.Select import Select
 from Utils.ExpressionInfo import ExpressionInfo
 from collections import OrderedDict
-from Catalog.Schema        import DBSchema
+from Catalog.Schema import DBSchema
 import operator
 from Query.Operators.TableScan import TableScan
 
