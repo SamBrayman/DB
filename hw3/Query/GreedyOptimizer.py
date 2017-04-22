@@ -13,12 +13,25 @@ from Query.Operators.TableScan import TableScan
 
 
 class GreedyOptimizer(Optimizer):
+  
+  # Checks if we have already computed the cost of this plan.
+  def getPlanCost(self, plan):
+    #return plan.finalize().cost(True)
+    left = plan.root.lhsPlan
+    right = plan.root.rhsPlan
+    joinMethod = plan.root.joinMethod
+    joinExpr = plan.root.joinExpr
+    tup = (left, right, joinMethod, joinExpr)
+    if tup in self.statsCache:
+        return self.statsCache[tup]
+    return None
+    
   def pickJoinOrder(self, plan):
-
+    
 
     #numTables = 2
     typesOfJoins = ["nested-loops", "block-nested-loops"]
-    count = 0
+    self.count = 0
     tableId = []
     joinOperators = []
     #operators = {}
@@ -30,7 +43,7 @@ class GreedyOptimizer(Optimizer):
     joinOp = None
     for (rand, operator) in plan.flatten():
         #joinOp = None
-        if joinOp is None and not isinstance(operator, Join) and isinstance(operator.subPlan, Join) and not isinstance(operator, Join) and not isinstance(operator, TableScan):
+        if joinOp is None and not isinstance(operator, Join) and not isinstance(operator, TableScan) and isinstance(operator.subPlan, Join) and not isinstance(operator, Join):
             joinOp = operator
 
         #now not none
@@ -54,7 +67,7 @@ class GreedyOptimizer(Optimizer):
             joinOperators.append(operator)
 
         elif isinstance(operator, TableScan):
-            currIDStr = str(operator.subPlan.id())
+            currIDStr = str(operator.id())
             if currIDStr not in plans:
                 currID = operator.id()
                 tableId.append(currID)
@@ -128,7 +141,7 @@ class GreedyOptimizer(Optimizer):
             if currExpr is None:
                 continue
 
-            count = count + 2
+            self.count = self.count + 2
 
             '''
             now test all different types of joins
@@ -150,14 +163,14 @@ class GreedyOptimizer(Optimizer):
                 if currCost is None:
                     currCost = testPlan.cost(estimated=True)
 
-                self.addPlanCost(plan, cost)
+                self.addPlanCost(plan, currCost)
 
 
                 #now see if currCost better than minimum
                 #if so, update selectPlan and minimum cost
                 if minimum is None or (minimum > currCost):
                     selectedPlan = testPlan
-                    minimum = cost
+                    minimum = currCost
                     opLeftId = leftId
                     opRightId = rightId
 
@@ -178,7 +191,7 @@ class GreedyOptimizer(Optimizer):
                 if currCost is None:
                     currCost = testPlan.cost(estimated=True)
 
-                self.addPlanCost(plan, cost)
+                self.addPlanCost(plan, currCost)
 
 
                 #now see if currCost better than minimum
@@ -211,7 +224,3 @@ class GreedyOptimizer(Optimizer):
         raise NotImplementedError
 
     return plans[tableIdList[0]]
-
-
-
-
