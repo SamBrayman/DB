@@ -26,7 +26,9 @@ The optimizer runs slower than the nonoptimized version, but not unsurprisingly.
 the larger number of queries in order to find the join ordering, but after that it runs smoothly. The relations probably didn't have as much skew in ordering, so an optimizer wouldn't help as much as expected. The optimizer doesn't take an unreasonable amount of time to perform the query though.
 
 Query5
-The optimizer does orders of magnitude better than the regular approach. Due to the large number of joins, an optimal join ordering would ensure that the query doesn't take as long. A naive approach is likely unreasonable considering the number of relationsthat are invovled in the query.
+The optimizer does orders of magnitude better than the regular approach. 
+Due to the large number of joins, an optimal join ordering would ensure that the query doesn't take as long. 
+A naive approach is likely unreasonable considering the number of relationsthat are invovled in the query.
 
 Note about the 416 part:
 
