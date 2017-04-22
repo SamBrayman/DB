@@ -34,9 +34,14 @@ Note about the 416 part:
 
 We attempted to implement the Greedy and Bushy Optimizers.
 
-Here are the times for testing Bushy and Greedy.  We want to quickly note that we had issues running the tests on the ugrad server- ugrad was running very slowly and our connections disconnected several times while running.  We think this might have caused our times to be relatively slow.  However, relative to each other the times should be ok because they were all run at the same time, on the same slow connection.
+Here are the times for testing Bushy and Greedy.  
+We want to quickly note that we had issues running the tests on the ugrad server- ugrad was running very slowly and our connections disconnected several times while running.  
+We think this might have caused our times to be relatively slow.  
+However, relative to each other the times should be ok because they were all run at the same time, on the same slow connection.
 
-The test are available in the TestBushyGreedy.py. We didn't have enough time to run the 12 join queries so we only have times for the 2, 4, 6, 8, and 10. Greedy was always faster than bushy. Based on the trend from the results we predict that the 12 join would show that Greedy was still faster than Bushy:
+The test are available in the TestBushyGreedy.py. 
+We didn't have enough time to run tquery12 so we only have times for queries 2, 4, 6, 8, and 10. 
+Greedy was always faster than bushy. Based on the trend from the results we predict that query12 would show that Greedy was still faster than Bushy:
 
 
 Greedy Times:
