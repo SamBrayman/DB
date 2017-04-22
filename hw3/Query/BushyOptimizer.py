@@ -14,11 +14,22 @@ from Query.Operators.TableScan import TableScan
 
 class BushyOptimizer(Optimizer):
 
+  def getPlanCost(self, plan):
+    #return plan.finalize().cost(True)
+    left = plan.root.lhsPlan
+    right = plan.root.rhsPlan
+    joinMethod = plan.root.joinMethod
+    joinExpr = plan.root.joinExpr
+    tup = (left, right, joinMethod, joinExpr)
+    if tup in self.statsCache:
+        return self.statsCache[tup]
+    return None
+
   def pickJoinOrder(self, plan):
 
     numTables = 2
     typesOfJoins = ["nested-loops", "block-nested-loops"]
-    count = 0
+    self.count = 0
     tableId = []
     joinOperators = []
     #operators = {}
@@ -30,7 +41,7 @@ class BushyOptimizer(Optimizer):
     joinOp = None
     for (rand, operator) in plan.flatten():
         #joinOp = None
-        if joinOp is None and not isinstance(operator, Join) and isinstance(operator.subPlan, Join) and not isinstance(operator, Join) and not isinstance(operator, TableScan):
+        if joinOp is None and not isinstance(operator, TableScan) and not isinstance(operator, Join) and isinstance(operator.subPlan, Join):
             joinOp = operator
 
         #now not none
@@ -54,7 +65,7 @@ class BushyOptimizer(Optimizer):
             joinOperators.append(operator)
 
         elif isinstance(operator, TableScan):
-            currIDStr = str(operator.subPlan.id())
+            currIDStr = str(operator.id())
             if currIDStr not in plans:
                 currID = operator.id()
                 tableId.append(currID)
@@ -82,7 +93,7 @@ class BushyOptimizer(Optimizer):
 
                 for j in innerCombos:
                     leftId = list(j)
-                    rightId = list(set(i) - set(j))
+                    rightId = list(set(currOrder) - set(j))
 
                     leftKey = ','.join(str(ID) for ID in leftId)
                     rightKey = ','.join(str(ID) for ID in rightId)
@@ -130,7 +141,7 @@ class BushyOptimizer(Optimizer):
                     if currExpr is None:
                         continue;
 
-                    count = count + 2
+                    self.count = self.count + 2
 
                     '''
                     now test all different types of joins
@@ -152,14 +163,14 @@ class BushyOptimizer(Optimizer):
                         if currCost is None:
                             currCost = testPlan.cost(estimated=True)
 
-                        self.addPlanCost(plan, cost)
+                        self.addPlanCost(plan, currCost)
 
 
                         #now see if currCost better than minimum
                         #if so, update selectPlan and minimum cost
                         if minimum is None or (minimum > currCost):
                             selectedPlan = testPlan
-                            minimum = cost
+                            minimum = currCost
 
 
                     #now try switching LHS and RHS to see if better cost
@@ -178,7 +189,7 @@ class BushyOptimizer(Optimizer):
                         if currCost is None:
                             currCost = testPlan.cost(estimated=True)
 
-                        self.addPlanCost(plan, cost)
+                        self.addPlanCost(plan, currCost)
 
 
                         #now see if currCost better than minimum
