@@ -57,6 +57,14 @@ class Optimizer:
   # Checks if we have already computed the cost of this plan.
   def getPlanCost(self, plan):
     return plan.finalize().cost(True)
+    #left = plan.root.lhsPlan
+    #right = plan.root.rhsPlan
+    #joinMethod = plan.root.joinMethod
+    #joinExpr = plan.root.joinExpr
+    #tup = (left, right, joinMethod, joinExpr)
+    #if tup in self.statsCache:
+     #   return self.statsCache[tup]
+    #return None
 
   # Given a plan, return an optimized plan with both selection and
   # projection operations pushed down to their nearest defining relation
