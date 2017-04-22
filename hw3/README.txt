@@ -8,6 +8,10 @@ The cost models use the simple equations from lecture more or less.
 Experiments were run on the .001 data set.
 
 Experiment Results
+
+Note that we have two graphs- graph one shows the first 4 queries and graph2 shows all 5.  Including the 5th query made the first four query times too hard to see, so we wanted to split them up for readability.  
+
+
 Query1 
 The optimizer and the regular approach run at basically the same speed. The algorithm takes into account
 queries on 1 relation.
