@@ -220,6 +220,10 @@ class GreedyOptimizer(Optimizer):
         numTables = numTables - 1
 
     if len(tableIdList) == 0:
+        #TODO: fix this- everything is getting deleted and it is of length zero and failing...
+        #this means the adding and deleting did not work
+        #as only one should be left
+        # if there is nothing left something is wrong
         raise NotImplementedError
 
     return plans[tableIdList[0]]
