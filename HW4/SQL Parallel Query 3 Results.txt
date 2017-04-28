@@ -1,0 +1,450 @@
+Elapsed: 00:00:05.24
+
+Execution Plan
+----------------------------------------------------------
+Plan hash value: 1183908891
+
+--------------------------------------------------------------------------------
+-------------
+
+| Id  | Operation               | Name      | Rows  | Bytes |TempSpc| Cost (%CPU
+)| Time     |
+
+--------------------------------------------------------------------------------
+-------------
+
+|   0 | SELECT STATEMENT        |           |   487K|    34M|       | 42129   (1
+)| 00:00:02 |
+
+|   1 |  HASH GROUP BY          |           |   487K|    34M|       | 42129   (1
+)| 00:00:02 |
+
+|   2 |   MERGE JOIN            |           |   487K|    34M|       | 42116   (1
+)| 00:00:02 |
+
+|   3 |    SORT JOIN            |           |  2651K|    65M|       | 29714   (1
+)| 00:00:02 |
+
+|   4 |     VIEW                | VW_GBC_10 |  2651K|    65M|       | 29714   (1
+)| 00:00:02 |
+
+|   5 |      HASH GROUP BY      |           |  2651K|   121M|       | 29714   (1
+)| 00:00:02 |
+
+|*  6 |       TABLE ACCESS FULL | LINEITEM  |  2651K|   121M|       | 29643   (1
+)| 00:00:02 |
+
+|*  7 |    SORT JOIN            |           |   239K|    10M|    27M| 12402   (1
+)| 00:00:01 |
+
+|   8 |     VIEW                | VW_GBF_11 |   239K|    10M|       |  9549   (1
+)| 00:00:01 |
+
+|   9 |      HASH GROUP BY      |           |   239K|    16M|       |  9549   (1
+)| 00:00:01 |
+
+|* 10 |       HASH JOIN         |           |   239K|    16M|  1144K|  9543   (1
+)| 00:00:01 |
+
+|* 11 |        TABLE ACCESS FULL| CUSTOMER  | 31474 |   768K|       |   950   (1
+)| 00:00:01 |
+
+|* 12 |        TABLE ACCESS FULL| ORDERS    |   684K|    31M|       |  6592   (1
+)| 00:00:01 |
+
+--------------------------------------------------------------------------------
+-------------
+
+
+Predicate Information (identified by operation id):
+---------------------------------------------------
+
+   6 - filter("L_SHIPDATE">TO_DATE(' 1995-03-15 00:00:00', 'syyyy-mm-dd hh24:mi:
+ss'))
+
+   7 - access("ITEM_1"="ITEM_1")
+       filter("ITEM_1"="ITEM_1")
+  10 - access("C_CUSTKEY"="O_CUSTKEY")
+  11 - filter("C_MKTSEGMENT"='BUILDING')
+  12 - filter("O_ORDERDATE"<TO_DATE(' 1995-03-15 00:00:00', 'syyyy-mm-dd
+              hh24:mi:ss'))
+
+Note
+-----
+   - dynamic statistics used: dynamic sampling (level=2)
+
+
+Statistics
+----------------------------------------------------------
+        707  recursive calls
+         10  db block gets
+     235730  consistent gets
+     172252  physical reads
+       1392  redo size
+     446295  bytes sent via SQL*Net to client
+       9066  bytes received via SQL*Net from client
+        776  SQL*Net roundtrips to/from client
+         20  sorts (memory)
+          0  sorts (disk)
+      11620  rows processed
+
+Elapsed: 00:00:05.71
+
+Execution Plan
+----------------------------------------------------------
+Plan hash value: 1183908891
+
+--------------------------------------------------------------------------------
+-------------
+
+| Id  | Operation               | Name      | Rows  | Bytes |TempSpc| Cost (%CPU
+)| Time     |
+
+--------------------------------------------------------------------------------
+-------------
+
+|   0 | SELECT STATEMENT        |           |   487K|    34M|       | 42129   (1
+)| 00:00:02 |
+
+|   1 |  HASH GROUP BY          |           |   487K|    34M|       | 42129   (1
+)| 00:00:02 |
+
+|   2 |   MERGE JOIN            |           |   487K|    34M|       | 42116   (1
+)| 00:00:02 |
+
+|   3 |    SORT JOIN            |           |  2651K|    65M|       | 29714   (1
+)| 00:00:02 |
+
+|   4 |     VIEW                | VW_GBC_10 |  2651K|    65M|       | 29714   (1
+)| 00:00:02 |
+
+|   5 |      HASH GROUP BY      |           |  2651K|   121M|       | 29714   (1
+)| 00:00:02 |
+
+|*  6 |       TABLE ACCESS FULL | LINEITEM  |  2651K|   121M|       | 29643   (1
+)| 00:00:02 |
+
+|*  7 |    SORT JOIN            |           |   239K|    10M|    27M| 12402   (1
+)| 00:00:01 |
+
+|   8 |     VIEW                | VW_GBF_11 |   239K|    10M|       |  9549   (1
+)| 00:00:01 |
+
+|   9 |      HASH GROUP BY      |           |   239K|    16M|       |  9549   (1
+)| 00:00:01 |
+
+|* 10 |       HASH JOIN         |           |   239K|    16M|  1144K|  9543   (1
+)| 00:00:01 |
+
+|* 11 |        TABLE ACCESS FULL| CUSTOMER  | 31474 |   768K|       |   950   (1
+)| 00:00:01 |
+
+|* 12 |        TABLE ACCESS FULL| ORDERS    |   684K|    31M|       |  6592   (1
+)| 00:00:01 |
+
+--------------------------------------------------------------------------------
+-------------
+
+
+Predicate Information (identified by operation id):
+---------------------------------------------------
+
+   6 - filter("L_SHIPDATE">TO_DATE(' 1995-03-15 00:00:00', 'syyyy-mm-dd hh24:mi:
+ss'))
+
+   7 - access("ITEM_1"="ITEM_1")
+       filter("ITEM_1"="ITEM_1")
+  10 - access("C_CUSTKEY"="O_CUSTKEY")
+  11 - filter("C_MKTSEGMENT"='BUILDING')
+  12 - filter("O_ORDERDATE"<TO_DATE(' 1995-03-15 00:00:00', 'syyyy-mm-dd
+              hh24:mi:ss'))
+
+Note
+-----
+   - dynamic statistics used: dynamic sampling (level=2)
+   - 1 Sql Plan Directive used for this statement
+
+
+Statistics
+----------------------------------------------------------
+        110  recursive calls
+          0  db block gets
+     242087  consistent gets
+     178018  physical reads
+        328  redo size
+     446335  bytes sent via SQL*Net to client
+       9066  bytes received via SQL*Net from client
+        776  SQL*Net roundtrips to/from client
+          5  sorts (memory)
+          0  sorts (disk)
+      11620  rows processed
+
+Elapsed: 00:00:03.18
+
+Execution Plan
+----------------------------------------------------------
+Plan hash value: 1183908891
+
+--------------------------------------------------------------------------------
+-------------
+
+| Id  | Operation               | Name      | Rows  | Bytes |TempSpc| Cost (%CPU
+)| Time     |
+
+--------------------------------------------------------------------------------
+-------------
+
+|   0 | SELECT STATEMENT        |           |   487K|    34M|       | 42129   (1
+)| 00:00:02 |
+
+|   1 |  HASH GROUP BY          |           |   487K|    34M|       | 42129   (1
+)| 00:00:02 |
+
+|   2 |   MERGE JOIN            |           |   487K|    34M|       | 42116   (1
+)| 00:00:02 |
+
+|   3 |    SORT JOIN            |           |  2651K|    65M|       | 29714   (1
+)| 00:00:02 |
+
+|   4 |     VIEW                | VW_GBC_10 |  2651K|    65M|       | 29714   (1
+)| 00:00:02 |
+
+|   5 |      HASH GROUP BY      |           |  2651K|   121M|       | 29714   (1
+)| 00:00:02 |
+
+|*  6 |       TABLE ACCESS FULL | LINEITEM  |  2651K|   121M|       | 29643   (1
+)| 00:00:02 |
+
+|*  7 |    SORT JOIN            |           |   239K|    10M|    27M| 12402   (1
+)| 00:00:01 |
+
+|   8 |     VIEW                | VW_GBF_11 |   239K|    10M|       |  9549   (1
+)| 00:00:01 |
+
+|   9 |      HASH GROUP BY      |           |   239K|    16M|       |  9549   (1
+)| 00:00:01 |
+
+|* 10 |       HASH JOIN         |           |   239K|    16M|  1144K|  9543   (1
+)| 00:00:01 |
+
+|* 11 |        TABLE ACCESS FULL| CUSTOMER  | 31474 |   768K|       |   950   (1
+)| 00:00:01 |
+
+|* 12 |        TABLE ACCESS FULL| ORDERS    |   684K|    31M|       |  6592   (1
+)| 00:00:01 |
+
+--------------------------------------------------------------------------------
+-------------
+
+
+Predicate Information (identified by operation id):
+---------------------------------------------------
+
+   6 - filter("L_SHIPDATE">TO_DATE(' 1995-03-15 00:00:00', 'syyyy-mm-dd hh24:mi:
+ss'))
+
+   7 - access("ITEM_1"="ITEM_1")
+       filter("ITEM_1"="ITEM_1")
+  10 - access("C_CUSTKEY"="O_CUSTKEY")
+  11 - filter("C_MKTSEGMENT"='BUILDING')
+  12 - filter("O_ORDERDATE"<TO_DATE(' 1995-03-15 00:00:00', 'syyyy-mm-dd
+              hh24:mi:ss'))
+
+Note
+-----
+   - dynamic statistics used: dynamic sampling (level=2)
+
+
+Statistics
+----------------------------------------------------------
+          0  recursive calls
+          0  db block gets
+     136153  consistent gets
+     108690  physical reads
+        248  redo size
+     446335  bytes sent via SQL*Net to client
+       9066  bytes received via SQL*Net from client
+        776  SQL*Net roundtrips to/from client
+          2  sorts (memory)
+          0  sorts (disk)
+      11620  rows processed
+
+Elapsed: 00:00:03.19
+
+Execution Plan
+----------------------------------------------------------
+Plan hash value: 1183908891
+
+--------------------------------------------------------------------------------
+-------------
+
+| Id  | Operation               | Name      | Rows  | Bytes |TempSpc| Cost (%CPU
+)| Time     |
+
+--------------------------------------------------------------------------------
+-------------
+
+|   0 | SELECT STATEMENT        |           |   487K|    34M|       | 42129   (1
+)| 00:00:02 |
+
+|   1 |  HASH GROUP BY          |           |   487K|    34M|       | 42129   (1
+)| 00:00:02 |
+
+|   2 |   MERGE JOIN            |           |   487K|    34M|       | 42116   (1
+)| 00:00:02 |
+
+|   3 |    SORT JOIN            |           |  2651K|    65M|       | 29714   (1
+)| 00:00:02 |
+
+|   4 |     VIEW                | VW_GBC_10 |  2651K|    65M|       | 29714   (1
+)| 00:00:02 |
+
+|   5 |      HASH GROUP BY      |           |  2651K|   121M|       | 29714   (1
+)| 00:00:02 |
+
+|*  6 |       TABLE ACCESS FULL | LINEITEM  |  2651K|   121M|       | 29643   (1
+)| 00:00:02 |
+
+|*  7 |    SORT JOIN            |           |   239K|    10M|    27M| 12402   (1
+)| 00:00:01 |
+
+|   8 |     VIEW                | VW_GBF_11 |   239K|    10M|       |  9549   (1
+)| 00:00:01 |
+
+|   9 |      HASH GROUP BY      |           |   239K|    16M|       |  9549   (1
+)| 00:00:01 |
+
+|* 10 |       HASH JOIN         |           |   239K|    16M|  1144K|  9543   (1
+)| 00:00:01 |
+
+|* 11 |        TABLE ACCESS FULL| CUSTOMER  | 31474 |   768K|       |   950   (1
+)| 00:00:01 |
+
+|* 12 |        TABLE ACCESS FULL| ORDERS    |   684K|    31M|       |  6592   (1
+)| 00:00:01 |
+
+--------------------------------------------------------------------------------
+-------------
+
+
+Predicate Information (identified by operation id):
+---------------------------------------------------
+
+   6 - filter("L_SHIPDATE">TO_DATE(' 1995-03-15 00:00:00', 'syyyy-mm-dd hh24:mi:
+ss'))
+
+   7 - access("ITEM_1"="ITEM_1")
+       filter("ITEM_1"="ITEM_1")
+  10 - access("C_CUSTKEY"="O_CUSTKEY")
+  11 - filter("C_MKTSEGMENT"='BUILDING')
+  12 - filter("O_ORDERDATE"<TO_DATE(' 1995-03-15 00:00:00', 'syyyy-mm-dd
+              hh24:mi:ss'))
+
+Note
+-----
+   - dynamic statistics used: dynamic sampling (level=2)
+
+
+Statistics
+----------------------------------------------------------
+          0  recursive calls
+          0  db block gets
+     136153  consistent gets
+     108690  physical reads
+        248  redo size
+     446335  bytes sent via SQL*Net to client
+       9066  bytes received via SQL*Net from client
+        776  SQL*Net roundtrips to/from client
+          2  sorts (memory)
+          0  sorts (disk)
+      11620  rows processed
+
+Elapsed: 00:00:03.23
+
+Execution Plan
+----------------------------------------------------------
+Plan hash value: 1183908891
+
+--------------------------------------------------------------------------------
+-------------
+
+| Id  | Operation               | Name      | Rows  | Bytes |TempSpc| Cost (%CPU
+)| Time     |
+
+--------------------------------------------------------------------------------
+-------------
+
+|   0 | SELECT STATEMENT        |           |   487K|    34M|       | 42129   (1
+)| 00:00:02 |
+
+|   1 |  HASH GROUP BY          |           |   487K|    34M|       | 42129   (1
+)| 00:00:02 |
+
+|   2 |   MERGE JOIN            |           |   487K|    34M|       | 42116   (1
+)| 00:00:02 |
+
+|   3 |    SORT JOIN            |           |  2651K|    65M|       | 29714   (1
+)| 00:00:02 |
+
+|   4 |     VIEW                | VW_GBC_10 |  2651K|    65M|       | 29714   (1
+)| 00:00:02 |
+
+|   5 |      HASH GROUP BY      |           |  2651K|   121M|       | 29714   (1
+)| 00:00:02 |
+
+|*  6 |       TABLE ACCESS FULL | LINEITEM  |  2651K|   121M|       | 29643   (1
+)| 00:00:02 |
+
+|*  7 |    SORT JOIN            |           |   239K|    10M|    27M| 12402   (1
+)| 00:00:01 |
+
+|   8 |     VIEW                | VW_GBF_11 |   239K|    10M|       |  9549   (1
+)| 00:00:01 |
+
+|   9 |      HASH GROUP BY      |           |   239K|    16M|       |  9549   (1
+)| 00:00:01 |
+
+|* 10 |       HASH JOIN         |           |   239K|    16M|  1144K|  9543   (1
+)| 00:00:01 |
+
+|* 11 |        TABLE ACCESS FULL| CUSTOMER  | 31474 |   768K|       |   950   (1
+)| 00:00:01 |
+
+|* 12 |        TABLE ACCESS FULL| ORDERS    |   684K|    31M|       |  6592   (1
+)| 00:00:01 |
+
+--------------------------------------------------------------------------------
+-------------
+
+
+Predicate Information (identified by operation id):
+---------------------------------------------------
+
+   6 - filter("L_SHIPDATE">TO_DATE(' 1995-03-15 00:00:00', 'syyyy-mm-dd hh24:mi:
+ss'))
+
+   7 - access("ITEM_1"="ITEM_1")
+       filter("ITEM_1"="ITEM_1")
+  10 - access("C_CUSTKEY"="O_CUSTKEY")
+  11 - filter("C_MKTSEGMENT"='BUILDING')
+  12 - filter("O_ORDERDATE"<TO_DATE(' 1995-03-15 00:00:00', 'syyyy-mm-dd
+              hh24:mi:ss'))
+
+Note
+-----
+   - dynamic statistics used: dynamic sampling (level=2)
+
+
+Statistics
+----------------------------------------------------------
+          0  recursive calls
+          0  db block gets
+     136153  consistent gets
+     108690  physical reads
+        204  redo size
+     446335  bytes sent via SQL*Net to client
+       9066  bytes received via SQL*Net from client
+        776  SQL*Net roundtrips to/from client
+          2  sorts (memory)
+          0  sorts (disk)
+      11620  rows processed

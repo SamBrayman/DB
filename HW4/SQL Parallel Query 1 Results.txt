@@ -1,0 +1,194 @@
+Elapsed: 00:00:05.19
+
+Execution Plan
+----------------------------------------------------------
+Plan hash value: 1773397105
+
+-------------------------------------------------------------------------------
+| Id  | Operation          | Name     | Rows  | Bytes | Cost (%CPU)| Time     |
+-------------------------------------------------------------------------------
+|   0 | SELECT STATEMENT   |          |  4881K|   311M| 29779   (1)| 00:00:02 |
+|   1 |  HASH GROUP BY     |          |  4881K|   311M| 29779   (1)| 00:00:02 |
+|*  2 |   TABLE ACCESS FULL| LINEITEM |  4881K|   311M| 29643   (1)| 00:00:02 |
+-------------------------------------------------------------------------------
+
+Predicate Information (identified by operation id):
+---------------------------------------------------
+
+   2 - filter("L_SHIPDATE"<=TO_DATE(' 1998-09-02 00:00:00',
+              'syyyy-mm-dd hh24:mi:ss'))
+
+Note
+-----
+   - dynamic statistics used: dynamic sampling (level=2)
+
+
+Statistics
+----------------------------------------------------------
+         22  recursive calls
+          0  db block gets
+     108722  consistent gets
+     108626  physical reads
+        124  redo size
+       1694  bytes sent via SQL*Net to client
+        552  bytes received via SQL*Net from client
+          2  SQL*Net roundtrips to/from client
+          0  sorts (memory)
+          0  sorts (disk)
+          4  rows processed
+
+Elapsed: 00:00:04.51
+
+Execution Plan
+----------------------------------------------------------
+Plan hash value: 1773397105
+
+-------------------------------------------------------------------------------
+| Id  | Operation          | Name     | Rows  | Bytes | Cost (%CPU)| Time     |
+-------------------------------------------------------------------------------
+|   0 | SELECT STATEMENT   |          |  4881K|   311M| 29779   (1)| 00:00:02 |
+|   1 |  HASH GROUP BY     |          |  4881K|   311M| 29779   (1)| 00:00:02 |
+|*  2 |   TABLE ACCESS FULL| LINEITEM |  4881K|   311M| 29643   (1)| 00:00:02 |
+-------------------------------------------------------------------------------
+
+Predicate Information (identified by operation id):
+---------------------------------------------------
+
+   2 - filter("L_SHIPDATE"<=TO_DATE(' 1998-09-02 00:00:00',
+              'syyyy-mm-dd hh24:mi:ss'))
+
+Note
+-----
+   - dynamic statistics used: dynamic sampling (level=2)
+
+
+Statistics
+----------------------------------------------------------
+          0  recursive calls
+          0  db block gets
+     108633  consistent gets
+     108626  physical reads
+          0  redo size
+       1694  bytes sent via SQL*Net to client
+        552  bytes received via SQL*Net from client
+          2  SQL*Net roundtrips to/from client
+          0  sorts (memory)
+          0  sorts (disk)
+          4  rows processed
+
+Elapsed: 00:00:04.53
+
+Execution Plan
+----------------------------------------------------------
+Plan hash value: 1773397105
+
+-------------------------------------------------------------------------------
+| Id  | Operation          | Name     | Rows  | Bytes | Cost (%CPU)| Time     |
+-------------------------------------------------------------------------------
+|   0 | SELECT STATEMENT   |          |  4881K|   311M| 29779   (1)| 00:00:02 |
+|   1 |  HASH GROUP BY     |          |  4881K|   311M| 29779   (1)| 00:00:02 |
+|*  2 |   TABLE ACCESS FULL| LINEITEM |  4881K|   311M| 29643   (1)| 00:00:02 |
+-------------------------------------------------------------------------------
+
+Predicate Information (identified by operation id):
+---------------------------------------------------
+
+   2 - filter("L_SHIPDATE"<=TO_DATE(' 1998-09-02 00:00:00',
+              'syyyy-mm-dd hh24:mi:ss'))
+
+Note
+-----
+   - dynamic statistics used: dynamic sampling (level=2)
+
+
+Statistics
+----------------------------------------------------------
+          0  recursive calls
+          0  db block gets
+     108633  consistent gets
+     108626  physical reads
+          0  redo size
+       1694  bytes sent via SQL*Net to client
+        552  bytes received via SQL*Net from client
+          2  SQL*Net roundtrips to/from client
+          0  sorts (memory)
+          0  sorts (disk)
+          4  rows processed
+
+Elapsed: 00:00:04.92
+
+Execution Plan
+----------------------------------------------------------
+Plan hash value: 1773397105
+
+-------------------------------------------------------------------------------
+| Id  | Operation          | Name     | Rows  | Bytes | Cost (%CPU)| Time     |
+-------------------------------------------------------------------------------
+|   0 | SELECT STATEMENT   |          |  4881K|   311M| 29779   (1)| 00:00:02 |
+|   1 |  HASH GROUP BY     |          |  4881K|   311M| 29779   (1)| 00:00:02 |
+|*  2 |   TABLE ACCESS FULL| LINEITEM |  4881K|   311M| 29643   (1)| 00:00:02 |
+-------------------------------------------------------------------------------
+
+Predicate Information (identified by operation id):
+---------------------------------------------------
+
+   2 - filter("L_SHIPDATE"<=TO_DATE(' 1998-09-02 00:00:00',
+              'syyyy-mm-dd hh24:mi:ss'))
+
+Note
+-----
+   - dynamic statistics used: dynamic sampling (level=2)
+
+
+Statistics
+----------------------------------------------------------
+          0  recursive calls
+          0  db block gets
+     108633  consistent gets
+     108626  physical reads
+          0  redo size
+       1694  bytes sent via SQL*Net to client
+        552  bytes received via SQL*Net from client
+          2  SQL*Net roundtrips to/from client
+          0  sorts (memory)
+          0  sorts (disk)
+          4  rows processed
+
+Elapsed: 00:00:04.83
+
+Execution Plan
+----------------------------------------------------------
+Plan hash value: 1773397105
+
+-------------------------------------------------------------------------------
+| Id  | Operation          | Name     | Rows  | Bytes | Cost (%CPU)| Time     |
+-------------------------------------------------------------------------------
+|   0 | SELECT STATEMENT   |          |  4881K|   311M| 29779   (1)| 00:00:02 |
+|   1 |  HASH GROUP BY     |          |  4881K|   311M| 29779   (1)| 00:00:02 |
+|*  2 |   TABLE ACCESS FULL| LINEITEM |  4881K|   311M| 29643   (1)| 00:00:02 |
+-------------------------------------------------------------------------------
+
+Predicate Information (identified by operation id):
+---------------------------------------------------
+
+   2 - filter("L_SHIPDATE"<=TO_DATE(' 1998-09-02 00:00:00',
+              'syyyy-mm-dd hh24:mi:ss'))
+
+Note
+-----
+   - dynamic statistics used: dynamic sampling (level=2)
+
+
+Statistics
+----------------------------------------------------------
+          0  recursive calls
+          0  db block gets
+     108633  consistent gets
+     108626  physical reads
+          0  redo size
+       1694  bytes sent via SQL*Net to client
+        552  bytes received via SQL*Net from client
+          2  SQL*Net roundtrips to/from client
+          0  sorts (memory)
+          0  sorts (disk)
+          4  rows processed

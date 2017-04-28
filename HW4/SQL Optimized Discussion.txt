@@ -1,0 +1,47 @@
+A materialized view on shipdate would reduce access costs thereby decreasing running time.
+Parallel processing would also speed up processing tuples.
+alter table lineitem parallel 4;
+create materialized view lineitem_shipdate enable query rewrite as select * from lineitem where l_shipdate <= DATE('1998-09-02');
+
+A materialized view on order and customer keys would reduce access costs thereby decreasing running time.
+Parallel processing would also speed up processing tuples.
+alter table lineitem parallel 4;
+alter table customer parallel 4;
+alter table orders parallel 4;
+create materialized view lineitem_orders enable query rewrite as select * from lineitem, orders where l_orderkey = o_orderkey;
+create materialized view customer_orders enable query rewrite as select * from customer, orders where c_custkey = o_ocustkey;
+
+We will use statistical analysis because there's a join on a lot of tables. Computing the best possible join is probably easier than maintaining
+a materialized view on all of the tables.
+Parallel processing would also speed up processing tuples.
+alter table lineitem parallel 4;
+alter table customer parallel 4;
+alter table orders parallel 4;
+alter table supplier parallel 4;
+alter table nation parallel 4;
+alter table region parallel 4;
+analyze table lineitem compute statistics; 
+analyze table customer compute statistics; 
+analyze table orders compute statistics; 
+analyze table supplier compute statistics; 
+analyze table nation compute statistics; 
+analyze table region compute statistics;
+
+We will use parallel processing to speed up processing tuples.
+A materialized view on shipdate would reduce access costs thereby decreasing running time.
+alter table lineitem parallel 4;
+create materialized view lineitem_shipdate enable query rewrite as select * from lineitem where l_shipdate >= DATE('1994-01-01');
+
+We will use a materialized view on orderkey and customer key to reduce access costs thereby decreasing running time.
+Parallel processing would also speed up processing tuples.
+create materialized view lineitem_orders enable query rewrite as select * from lineitem, orders where l_orderkey = o_orderkey;
+create materialized view customer_orders enable query rewrite as select * from customer, orders where c_custkey = o_ocustkey;
+alter table lineitem parallel 4;
+alter table customer parallel 4;
+alter table orders parallel 4;
+
+We will use a materialized view on customer key to reduce access costs thereby decreasing running time.
+We will use parallel processing to speed up processing tuples.
+create materialized view customer_orders enable query rewrite as select * from customer, orders where c_custkey = o_ocustkey;
+alter table customer parallel 4;
+alter table orders parallel 4;

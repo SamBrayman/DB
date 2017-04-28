@@ -1,0 +1,20 @@
+create materialized view lineitem_orders enable query rewrite as select * from lineitem, orders where l_orderkey = o_orderkey; BASE
+
+create materialized view lineitem_shipdate enable query rewrite as select * from lineitem where l_shipdate <= DATE('1998-09-02');
+
+create materialized view lineitem_orders enable query rewrite as select * from lineitem, orders where l_orderkey = o_orderkey;
+create materialized view customer_orders enable query rewrite as select * from customer, orders where c_custkey = o_ocustkey;
+
+create materialized view lineitem_orders enable query rewrite as select * from lineitem, orders where l_orderkey = o_orderkey;
+create materialized view nation_region enable query rewrite as select * from nation, region where n_regionkey = r_regionkey;
+create materialized view supplier_nation enable query rewrite as select * from supplier, nation where s_nationkey = n_nationkey;
+create materialized view customer_orders enable query rewrite as select * from customer, orders where c_custkey = o_ocustkey;
+
+create materialized view lineitem_shipdate enable query rewrite as select * from lineitem where l_shipdate <= DATE('1994-01-01');
+
+create materialized view orders_lineitem enable query rewrite as select * from orders, lineitem where o_orderkey = l_orderkey;
+=
+create materialized view lineitem_orders enable query rewrite as select * from lineitem, orders where l_orderkey = o_orderkey;
+create materialized view customer_orders enable query rewrite as select * from customer, orders where c_custkey = o_ocustkey;
+
+create materialized view customer_orders enable query rewrite as select * from customer, orders where c_custkey = o_ocustkey;
