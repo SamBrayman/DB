@@ -1,0 +1,195 @@
+Elapsed: 00:00:00.85
+
+Execution Plan
+----------------------------------------------------------
+Plan hash value: 2287326370
+
+-------------------------------------------------------------------------------
+| Id  | Operation          | Name     | Rows  | Bytes | Cost (%CPU)| Time     |
+-------------------------------------------------------------------------------
+|   0 | SELECT STATEMENT   |          |     1 |    16 | 29661   (1)| 00:00:02 |
+|   1 |  SORT AGGREGATE    |          |     1 |    16 |            |          |
+|*  2 |   TABLE ACCESS FULL| LINEITEM |   155K|  2435K| 29661   (1)| 00:00:02 |
+-------------------------------------------------------------------------------
+
+Predicate Information (identified by operation id):
+---------------------------------------------------
+
+   2 - filter("L_SHIPDATE"<TO_DATE(' 1995-01-01 00:00:00', 'syyyy-mm-dd
+              hh24:mi:ss') AND "L_QUANTITY"<24 AND "L_DISCOUNT">=.05 AND
+              "L_SHIPDATE">=TO_DATE(' 1994-01-01 00:00:00', 'syyyy-mm-dd hh24:mi
+:ss')
+
+              AND "L_DISCOUNT"<=.07)
+
+
+Statistics
+----------------------------------------------------------
+          1  recursive calls
+          0  db block gets
+     108633  consistent gets
+     108626  physical reads
+          0  redo size
+        547  bytes sent via SQL*Net to client
+        552  bytes received via SQL*Net from client
+          2  SQL*Net roundtrips to/from client
+          0  sorts (memory)
+          0  sorts (disk)
+          1  rows processed
+
+Elapsed: 00:00:00.84
+
+Execution Plan
+----------------------------------------------------------
+Plan hash value: 2287326370
+
+-------------------------------------------------------------------------------
+| Id  | Operation          | Name     | Rows  | Bytes | Cost (%CPU)| Time     |
+-------------------------------------------------------------------------------
+|   0 | SELECT STATEMENT   |          |     1 |    16 | 29661   (1)| 00:00:02 |
+|   1 |  SORT AGGREGATE    |          |     1 |    16 |            |          |
+|*  2 |   TABLE ACCESS FULL| LINEITEM |   155K|  2435K| 29661   (1)| 00:00:02 |
+-------------------------------------------------------------------------------
+
+Predicate Information (identified by operation id):
+---------------------------------------------------
+
+   2 - filter("L_SHIPDATE"<TO_DATE(' 1995-01-01 00:00:00', 'syyyy-mm-dd
+              hh24:mi:ss') AND "L_QUANTITY"<24 AND "L_DISCOUNT">=.05 AND
+              "L_SHIPDATE">=TO_DATE(' 1994-01-01 00:00:00', 'syyyy-mm-dd hh24:mi
+:ss')
+
+              AND "L_DISCOUNT"<=.07)
+
+
+Statistics
+----------------------------------------------------------
+          0  recursive calls
+          0  db block gets
+     108633  consistent gets
+     108626  physical reads
+          0  redo size
+        547  bytes sent via SQL*Net to client
+        552  bytes received via SQL*Net from client
+          2  SQL*Net roundtrips to/from client
+          0  sorts (memory)
+          0  sorts (disk)
+          1  rows processed
+
+Elapsed: 00:00:00.95
+
+Execution Plan
+----------------------------------------------------------
+Plan hash value: 2287326370
+
+-------------------------------------------------------------------------------
+| Id  | Operation          | Name     | Rows  | Bytes | Cost (%CPU)| Time     |
+-------------------------------------------------------------------------------
+|   0 | SELECT STATEMENT   |          |     1 |    16 | 29661   (1)| 00:00:02 |
+|   1 |  SORT AGGREGATE    |          |     1 |    16 |            |          |
+|*  2 |   TABLE ACCESS FULL| LINEITEM |   155K|  2435K| 29661   (1)| 00:00:02 |
+-------------------------------------------------------------------------------
+
+Predicate Information (identified by operation id):
+---------------------------------------------------
+
+   2 - filter("L_SHIPDATE"<TO_DATE(' 1995-01-01 00:00:00', 'syyyy-mm-dd
+              hh24:mi:ss') AND "L_QUANTITY"<24 AND "L_DISCOUNT">=.05 AND
+              "L_SHIPDATE">=TO_DATE(' 1994-01-01 00:00:00', 'syyyy-mm-dd hh24:mi
+:ss')
+
+              AND "L_DISCOUNT"<=.07)
+
+
+Statistics
+----------------------------------------------------------
+          0  recursive calls
+          0  db block gets
+     108633  consistent gets
+     108626  physical reads
+          0  redo size
+        547  bytes sent via SQL*Net to client
+        552  bytes received via SQL*Net from client
+          2  SQL*Net roundtrips to/from client
+          0  sorts (memory)
+          0  sorts (disk)
+          1  rows processed
+
+Elapsed: 00:00:00.78
+
+Execution Plan
+----------------------------------------------------------
+Plan hash value: 2287326370
+
+-------------------------------------------------------------------------------
+| Id  | Operation          | Name     | Rows  | Bytes | Cost (%CPU)| Time     |
+-------------------------------------------------------------------------------
+|   0 | SELECT STATEMENT   |          |     1 |    16 | 29661   (1)| 00:00:02 |
+|   1 |  SORT AGGREGATE    |          |     1 |    16 |            |          |
+|*  2 |   TABLE ACCESS FULL| LINEITEM |   155K|  2435K| 29661   (1)| 00:00:02 |
+-------------------------------------------------------------------------------
+
+Predicate Information (identified by operation id):
+---------------------------------------------------
+
+   2 - filter("L_SHIPDATE"<TO_DATE(' 1995-01-01 00:00:00', 'syyyy-mm-dd
+              hh24:mi:ss') AND "L_QUANTITY"<24 AND "L_DISCOUNT">=.05 AND
+              "L_SHIPDATE">=TO_DATE(' 1994-01-01 00:00:00', 'syyyy-mm-dd hh24:mi
+:ss')
+
+              AND "L_DISCOUNT"<=.07)
+
+
+Statistics
+----------------------------------------------------------
+          0  recursive calls
+          0  db block gets
+     108633  consistent gets
+     108626  physical reads
+          0  redo size
+        547  bytes sent via SQL*Net to client
+        552  bytes received via SQL*Net from client
+          2  SQL*Net roundtrips to/from client
+          0  sorts (memory)
+          0  sorts (disk)
+          1  rows processed
+
+Elapsed: 00:00:00.93
+
+Execution Plan
+----------------------------------------------------------
+Plan hash value: 2287326370
+
+-------------------------------------------------------------------------------
+| Id  | Operation          | Name     | Rows  | Bytes | Cost (%CPU)| Time     |
+-------------------------------------------------------------------------------
+|   0 | SELECT STATEMENT   |          |     1 |    16 | 29661   (1)| 00:00:02 |
+|   1 |  SORT AGGREGATE    |          |     1 |    16 |            |          |
+|*  2 |   TABLE ACCESS FULL| LINEITEM |   155K|  2435K| 29661   (1)| 00:00:02 |
+-------------------------------------------------------------------------------
+
+Predicate Information (identified by operation id):
+---------------------------------------------------
+
+   2 - filter("L_SHIPDATE"<TO_DATE(' 1995-01-01 00:00:00', 'syyyy-mm-dd
+              hh24:mi:ss') AND "L_QUANTITY"<24 AND "L_DISCOUNT">=.05 AND
+              "L_SHIPDATE">=TO_DATE(' 1994-01-01 00:00:00', 'syyyy-mm-dd hh24:mi
+:ss')
+
+              AND "L_DISCOUNT"<=.07)
+
+
+Statistics
+----------------------------------------------------------
+          0  recursive calls
+          0  db block gets
+     108633  consistent gets
+     108626  physical reads
+          0  redo size
+        547  bytes sent via SQL*Net to client
+        552  bytes received via SQL*Net from client
+          2  SQL*Net roundtrips to/from client
+          0  sorts (memory)
+          0  sorts (disk)
+          1  rows processed
+

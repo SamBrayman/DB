@@ -1,0 +1,329 @@
+Elapsed: 00:00:01.92
+
+Execution Plan
+----------------------------------------------------------
+Plan hash value: 2785378426
+
+--------------------------------------------------------------------------------
+---------
+
+| Id  | Operation            | Name     | Rows  | Bytes |TempSpc| Cost (%CPU)| T
+ime     |
+
+--------------------------------------------------------------------------------
+---------
+
+|   0 | SELECT STATEMENT     |          |   492K|    23M|       | 48453   (1)| 0
+0:00:02 |
+
+|   1 |  HASH GROUP BY       |          |   492K|    23M|    30M| 48453   (1)| 0
+0:00:02 |
+
+|*  2 |   HASH JOIN          |          |   492K|    23M|  9192K| 42389   (1)| 0
+0:00:02 |
+
+|*  3 |    HASH JOIN         |          |   218K|  6622K|       |  7545   (1)| 0
+0:00:01 |
+
+|*  4 |     TABLE ACCESS FULL| CUSTOMER | 30000 |   410K|       |   950   (1)| 0
+0:00:01 |
+
+|*  5 |     TABLE ACCESS FULL| ORDERS   |   729K|    11M|       |  6593   (1)| 0
+0:00:01 |
+
+|*  6 |    TABLE ACCESS FULL | LINEITEM |  3225K|    58M|       | 29654   (1)| 0
+0:00:02 |
+
+--------------------------------------------------------------------------------
+---------
+
+
+Predicate Information (identified by operation id):
+---------------------------------------------------
+
+   2 - access("L_ORDERKEY"="O_ORDERKEY")
+   3 - access("C_CUSTKEY"="O_CUSTKEY")
+   4 - filter("C_MKTSEGMENT"='BUILDING')
+   5 - filter("O_ORDERDATE"<TO_DATE(' 1995-03-15 00:00:00', 'syyyy-mm-dd
+              hh24:mi:ss'))
+   6 - filter("L_SHIPDATE">TO_DATE(' 1995-03-15 00:00:00', 'syyyy-mm-dd
+              hh24:mi:ss'))
+
+
+Statistics
+----------------------------------------------------------
+          4  recursive calls
+          0  db block gets
+     136156  consistent gets
+     108626  physical reads
+        248  redo size
+     446295  bytes sent via SQL*Net to client
+       9066  bytes received via SQL*Net from client
+        776  SQL*Net roundtrips to/from client
+          0  sorts (memory)
+          0  sorts (disk)
+      11620  rows processed
+
+Elapsed: 00:00:01.84
+
+Execution Plan
+----------------------------------------------------------
+Plan hash value: 2785378426
+
+--------------------------------------------------------------------------------
+---------
+
+| Id  | Operation            | Name     | Rows  | Bytes |TempSpc| Cost (%CPU)| T
+ime     |
+
+--------------------------------------------------------------------------------
+---------
+
+|   0 | SELECT STATEMENT     |          |   492K|    23M|       | 48453   (1)| 0
+0:00:02 |
+
+|   1 |  HASH GROUP BY       |          |   492K|    23M|    30M| 48453   (1)| 0
+0:00:02 |
+
+|*  2 |   HASH JOIN          |          |   492K|    23M|  9192K| 42389   (1)| 0
+0:00:02 |
+
+|*  3 |    HASH JOIN         |          |   218K|  6622K|       |  7545   (1)| 0
+0:00:01 |
+
+|*  4 |     TABLE ACCESS FULL| CUSTOMER | 30000 |   410K|       |   950   (1)| 0
+0:00:01 |
+
+|*  5 |     TABLE ACCESS FULL| ORDERS   |   729K|    11M|       |  6593   (1)| 0
+0:00:01 |
+
+|*  6 |    TABLE ACCESS FULL | LINEITEM |  3225K|    58M|       | 29654   (1)| 0
+0:00:02 |
+
+--------------------------------------------------------------------------------
+---------
+
+
+Predicate Information (identified by operation id):
+---------------------------------------------------
+
+   2 - access("L_ORDERKEY"="O_ORDERKEY")
+   3 - access("C_CUSTKEY"="O_CUSTKEY")
+   4 - filter("C_MKTSEGMENT"='BUILDING')
+   5 - filter("O_ORDERDATE"<TO_DATE(' 1995-03-15 00:00:00', 'syyyy-mm-dd
+              hh24:mi:ss'))
+   6 - filter("L_SHIPDATE">TO_DATE(' 1995-03-15 00:00:00', 'syyyy-mm-dd
+              hh24:mi:ss'))
+
+
+Statistics
+----------------------------------------------------------
+          4  recursive calls
+          0  db block gets
+     136156  consistent gets
+     108626  physical reads
+        248  redo size
+     446335  bytes sent via SQL*Net to client
+       9066  bytes received via SQL*Net from client
+        776  SQL*Net roundtrips to/from client
+          0  sorts (memory)
+          0  sorts (disk)
+      11620  rows processed
+
+Elapsed: 00:00:01.78
+
+Execution Plan
+----------------------------------------------------------
+Plan hash value: 2785378426
+
+--------------------------------------------------------------------------------
+---------
+
+| Id  | Operation            | Name     | Rows  | Bytes |TempSpc| Cost (%CPU)| T
+ime     |
+
+--------------------------------------------------------------------------------
+---------
+
+|   0 | SELECT STATEMENT     |          |   492K|    23M|       | 48453   (1)| 0
+0:00:02 |
+
+|   1 |  HASH GROUP BY       |          |   492K|    23M|    30M| 48453   (1)| 0
+0:00:02 |
+
+|*  2 |   HASH JOIN          |          |   492K|    23M|  9192K| 42389   (1)| 0
+0:00:02 |
+
+|*  3 |    HASH JOIN         |          |   218K|  6622K|       |  7545   (1)| 0
+0:00:01 |
+
+|*  4 |     TABLE ACCESS FULL| CUSTOMER | 30000 |   410K|       |   950   (1)| 0
+0:00:01 |
+
+|*  5 |     TABLE ACCESS FULL| ORDERS   |   729K|    11M|       |  6593   (1)| 0
+0:00:01 |
+
+|*  6 |    TABLE ACCESS FULL | LINEITEM |  3225K|    58M|       | 29654   (1)| 0
+0:00:02 |
+
+--------------------------------------------------------------------------------
+---------
+
+
+Predicate Information (identified by operation id):
+---------------------------------------------------
+
+   2 - access("L_ORDERKEY"="O_ORDERKEY")
+   3 - access("C_CUSTKEY"="O_CUSTKEY")
+   4 - filter("C_MKTSEGMENT"='BUILDING')
+   5 - filter("O_ORDERDATE"<TO_DATE(' 1995-03-15 00:00:00', 'syyyy-mm-dd
+              hh24:mi:ss'))
+   6 - filter("L_SHIPDATE">TO_DATE(' 1995-03-15 00:00:00', 'syyyy-mm-dd
+              hh24:mi:ss'))
+
+
+Statistics
+----------------------------------------------------------
+          0  recursive calls
+          0  db block gets
+     136153  consistent gets
+     108626  physical reads
+        248  redo size
+     446335  bytes sent via SQL*Net to client
+       9066  bytes received via SQL*Net from client
+        776  SQL*Net roundtrips to/from client
+          0  sorts (memory)
+          0  sorts (disk)
+      11620  rows processed
+
+Elapsed: 00:00:01.76
+
+Execution Plan
+----------------------------------------------------------
+Plan hash value: 2785378426
+
+--------------------------------------------------------------------------------
+---------
+
+| Id  | Operation            | Name     | Rows  | Bytes |TempSpc| Cost (%CPU)| T
+ime     |
+
+--------------------------------------------------------------------------------
+---------
+
+|   0 | SELECT STATEMENT     |          |   492K|    23M|       | 48453   (1)| 0
+0:00:02 |
+
+|   1 |  HASH GROUP BY       |          |   492K|    23M|    30M| 48453   (1)| 0
+0:00:02 |
+
+|*  2 |   HASH JOIN          |          |   492K|    23M|  9192K| 42389   (1)| 0
+0:00:02 |
+
+|*  3 |    HASH JOIN         |          |   218K|  6622K|       |  7545   (1)| 0
+0:00:01 |
+
+|*  4 |     TABLE ACCESS FULL| CUSTOMER | 30000 |   410K|       |   950   (1)| 0
+0:00:01 |
+
+|*  5 |     TABLE ACCESS FULL| ORDERS   |   729K|    11M|       |  6593   (1)| 0
+0:00:01 |
+
+|*  6 |    TABLE ACCESS FULL | LINEITEM |  3225K|    58M|       | 29654   (1)| 0
+0:00:02 |
+
+--------------------------------------------------------------------------------
+---------
+
+
+Predicate Information (identified by operation id):
+---------------------------------------------------
+
+   2 - access("L_ORDERKEY"="O_ORDERKEY")
+   3 - access("C_CUSTKEY"="O_CUSTKEY")
+   4 - filter("C_MKTSEGMENT"='BUILDING')
+   5 - filter("O_ORDERDATE"<TO_DATE(' 1995-03-15 00:00:00', 'syyyy-mm-dd
+              hh24:mi:ss'))
+   6 - filter("L_SHIPDATE">TO_DATE(' 1995-03-15 00:00:00', 'syyyy-mm-dd
+              hh24:mi:ss'))
+
+
+Statistics
+----------------------------------------------------------
+          0  recursive calls
+          0  db block gets
+     136153  consistent gets
+     108626  physical reads
+        248  redo size
+     446335  bytes sent via SQL*Net to client
+       9066  bytes received via SQL*Net from client
+        776  SQL*Net roundtrips to/from client
+          0  sorts (memory)
+          0  sorts (disk)
+      11620  rows processed
+
+Elapsed: 00:00:01.87
+
+Execution Plan
+----------------------------------------------------------
+Plan hash value: 2785378426
+
+--------------------------------------------------------------------------------
+---------
+
+| Id  | Operation            | Name     | Rows  | Bytes |TempSpc| Cost (%CPU)| T
+ime     |
+
+--------------------------------------------------------------------------------
+---------
+
+|   0 | SELECT STATEMENT     |          |   492K|    23M|       | 48453   (1)| 0
+0:00:02 |
+
+|   1 |  HASH GROUP BY       |          |   492K|    23M|    30M| 48453   (1)| 0
+0:00:02 |
+
+|*  2 |   HASH JOIN          |          |   492K|    23M|  9192K| 42389   (1)| 0
+0:00:02 |
+
+|*  3 |    HASH JOIN         |          |   218K|  6622K|       |  7545   (1)| 0
+0:00:01 |
+
+|*  4 |     TABLE ACCESS FULL| CUSTOMER | 30000 |   410K|       |   950   (1)| 0
+0:00:01 |
+
+|*  5 |     TABLE ACCESS FULL| ORDERS   |   729K|    11M|       |  6593   (1)| 0
+0:00:01 |
+
+|*  6 |    TABLE ACCESS FULL | LINEITEM |  3225K|    58M|       | 29654   (1)| 0
+0:00:02 |
+
+--------------------------------------------------------------------------------
+---------
+
+
+Predicate Information (identified by operation id):
+---------------------------------------------------
+
+   2 - access("L_ORDERKEY"="O_ORDERKEY")
+   3 - access("C_CUSTKEY"="O_CUSTKEY")
+   4 - filter("C_MKTSEGMENT"='BUILDING')
+   5 - filter("O_ORDERDATE"<TO_DATE(' 1995-03-15 00:00:00', 'syyyy-mm-dd
+              hh24:mi:ss'))
+   6 - filter("L_SHIPDATE">TO_DATE(' 1995-03-15 00:00:00', 'syyyy-mm-dd
+              hh24:mi:ss'))
+
+
+Statistics
+----------------------------------------------------------
+          0  recursive calls
+          0  db block gets
+     136153  consistent gets
+     108626  physical reads
+        248  redo size
+     446335  bytes sent via SQL*Net to client
+       9066  bytes received via SQL*Net from client
+        776  SQL*Net roundtrips to/from client
+          0  sorts (memory)
+          0  sorts (disk)
+      11620  rows processed

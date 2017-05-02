@@ -1,0 +1,354 @@
+Elapsed: 00:00:03.86
+
+Execution Plan
+----------------------------------------------------------
+Plan hash value: 2785378426
+
+--------------------------------------------------------------------------------
+---------
+
+| Id  | Operation            | Name     | Rows  | Bytes |TempSpc| Cost (%CPU)| T
+ime     |
+
+--------------------------------------------------------------------------------
+---------
+
+|   0 | SELECT STATEMENT     |          |   466K|    26M|       | 49910   (1)| 0
+0:00:02 |
+
+|   1 |  HASH GROUP BY       |          |   466K|    26M|    32M| 49910   (1)| 0
+0:00:02 |
+
+|*  2 |   HASH JOIN          |          |   466K|    26M|  9512K| 43208   (1)| 0
+0:00:02 |
+
+|*  3 |    HASH JOIN         |          |   198K|  7177K|       |  7544   (1)| 0
+0:00:01 |
+
+|*  4 |     TABLE ACCESS FULL| CUSTOMER | 28980 |   452K|       |   950   (1)| 0
+0:00:01 |
+
+|*  5 |     TABLE ACCESS FULL| ORDERS   |   690K|    13M|       |  6593   (1)| 0
+0:00:01 |
+
+|*  6 |    TABLE ACCESS FULL | LINEITEM |  3342K|    73M|       | 29654   (1)| 0
+0:00:02 |
+
+--------------------------------------------------------------------------------
+---------
+
+
+Predicate Information (identified by operation id):
+---------------------------------------------------
+
+   2 - access("L_ORDERKEY"="O_ORDERKEY")
+   3 - access("C_CUSTKEY"="O_CUSTKEY")
+   4 - filter("C_MKTSEGMENT"='BUILDING')
+   5 - filter("O_ORDERDATE"<TO_DATE(' 1995-03-15 00:00:00', 'syyyy-mm-dd
+              hh24:mi:ss'))
+   6 - filter("L_SHIPDATE">TO_DATE(' 1995-03-15 00:00:00', 'syyyy-mm-dd
+              hh24:mi:ss'))
+
+Note
+-----
+   - dynamic statistics used: dynamic sampling (level=2)
+   - 3 Sql Plan Directives used for this statement
+
+
+Statistics
+----------------------------------------------------------
+        249  recursive calls
+          0  db block gets
+     234256  consistent gets
+     200577  physical reads
+        328  redo size
+     446295  bytes sent via SQL*Net to client
+       9066  bytes received via SQL*Net from client
+        776  SQL*Net roundtrips to/from client
+          5  sorts (memory)
+          0  sorts (disk)
+      11620  rows processed
+
+Elapsed: 00:00:02.01
+
+Execution Plan
+----------------------------------------------------------
+Plan hash value: 2785378426
+
+--------------------------------------------------------------------------------
+---------
+
+| Id  | Operation            | Name     | Rows  | Bytes |TempSpc| Cost (%CPU)| T
+ime     |
+
+--------------------------------------------------------------------------------
+---------
+
+|   0 | SELECT STATEMENT     |          |   466K|    26M|       | 49910   (1)| 0
+0:00:02 |
+
+|   1 |  HASH GROUP BY       |          |   466K|    26M|    32M| 49910   (1)| 0
+0:00:02 |
+
+|*  2 |   HASH JOIN          |          |   466K|    26M|  9512K| 43208   (1)| 0
+0:00:02 |
+
+|*  3 |    HASH JOIN         |          |   198K|  7177K|       |  7544   (1)| 0
+0:00:01 |
+
+|*  4 |     TABLE ACCESS FULL| CUSTOMER | 28980 |   452K|       |   950   (1)| 0
+0:00:01 |
+
+|*  5 |     TABLE ACCESS FULL| ORDERS   |   690K|    13M|       |  6593   (1)| 0
+0:00:01 |
+
+|*  6 |    TABLE ACCESS FULL | LINEITEM |  3342K|    73M|       | 29654   (1)| 0
+0:00:02 |
+
+--------------------------------------------------------------------------------
+---------
+
+
+Predicate Information (identified by operation id):
+---------------------------------------------------
+
+   2 - access("L_ORDERKEY"="O_ORDERKEY")
+   3 - access("C_CUSTKEY"="O_CUSTKEY")
+   4 - filter("C_MKTSEGMENT"='BUILDING')
+   5 - filter("O_ORDERDATE"<TO_DATE(' 1995-03-15 00:00:00', 'syyyy-mm-dd
+              hh24:mi:ss'))
+   6 - filter("L_SHIPDATE">TO_DATE(' 1995-03-15 00:00:00', 'syyyy-mm-dd
+              hh24:mi:ss'))
+
+Note
+-----
+   - dynamic statistics used: dynamic sampling (level=2)
+   - 3 Sql Plan Directives used for this statement
+
+
+Statistics
+----------------------------------------------------------
+         34  recursive calls
+          0  db block gets
+     138512  consistent gets
+     136125  physical reads
+        328  redo size
+     446335  bytes sent via SQL*Net to client
+       9066  bytes received via SQL*Net from client
+        776  SQL*Net roundtrips to/from client
+          0  sorts (memory)
+          0  sorts (disk)
+      11620  rows processed
+
+Elapsed: 00:00:01.79
+
+Execution Plan
+----------------------------------------------------------
+Plan hash value: 2785378426
+
+--------------------------------------------------------------------------------
+---------
+
+| Id  | Operation            | Name     | Rows  | Bytes |TempSpc| Cost (%CPU)| T
+ime     |
+
+--------------------------------------------------------------------------------
+---------
+
+|   0 | SELECT STATEMENT     |          |   466K|    26M|       | 49910   (1)| 0
+0:00:02 |
+
+|   1 |  HASH GROUP BY       |          |   466K|    26M|    32M| 49910   (1)| 0
+0:00:02 |
+
+|*  2 |   HASH JOIN          |          |   466K|    26M|  9512K| 43208   (1)| 0
+0:00:02 |
+
+|*  3 |    HASH JOIN         |          |   198K|  7177K|       |  7544   (1)| 0
+0:00:01 |
+
+|*  4 |     TABLE ACCESS FULL| CUSTOMER | 28980 |   452K|       |   950   (1)| 0
+0:00:01 |
+
+|*  5 |     TABLE ACCESS FULL| ORDERS   |   690K|    13M|       |  6593   (1)| 0
+0:00:01 |
+
+|*  6 |    TABLE ACCESS FULL | LINEITEM |  3342K|    73M|       | 29654   (1)| 0
+0:00:02 |
+
+--------------------------------------------------------------------------------
+---------
+
+
+Predicate Information (identified by operation id):
+---------------------------------------------------
+
+   2 - access("L_ORDERKEY"="O_ORDERKEY")
+   3 - access("C_CUSTKEY"="O_CUSTKEY")
+   4 - filter("C_MKTSEGMENT"='BUILDING')
+   5 - filter("O_ORDERDATE"<TO_DATE(' 1995-03-15 00:00:00', 'syyyy-mm-dd
+              hh24:mi:ss'))
+   6 - filter("L_SHIPDATE">TO_DATE(' 1995-03-15 00:00:00', 'syyyy-mm-dd
+              hh24:mi:ss'))
+
+Note
+-----
+   - dynamic statistics used: dynamic sampling (level=2)
+   - 3 Sql Plan Directives used for this statement
+
+
+Statistics
+----------------------------------------------------------
+          0  recursive calls
+          0  db block gets
+     136141  consistent gets
+     136125  physical reads
+          0  redo size
+     446335  bytes sent via SQL*Net to client
+       9066  bytes received via SQL*Net from client
+        776  SQL*Net roundtrips to/from client
+          0  sorts (memory)
+          0  sorts (disk)
+      11620  rows processed
+
+Elapsed: 00:00:01.87
+
+Execution Plan
+----------------------------------------------------------
+Plan hash value: 2785378426
+
+--------------------------------------------------------------------------------
+---------
+
+| Id  | Operation            | Name     | Rows  | Bytes |TempSpc| Cost (%CPU)| T
+ime     |
+
+--------------------------------------------------------------------------------
+---------
+
+|   0 | SELECT STATEMENT     |          |   466K|    26M|       | 49910   (1)| 0
+0:00:02 |
+
+|   1 |  HASH GROUP BY       |          |   466K|    26M|    32M| 49910   (1)| 0
+0:00:02 |
+
+|*  2 |   HASH JOIN          |          |   466K|    26M|  9512K| 43208   (1)| 0
+0:00:02 |
+
+|*  3 |    HASH JOIN         |          |   198K|  7177K|       |  7544   (1)| 0
+0:00:01 |
+
+|*  4 |     TABLE ACCESS FULL| CUSTOMER | 28980 |   452K|       |   950   (1)| 0
+0:00:01 |
+
+|*  5 |     TABLE ACCESS FULL| ORDERS   |   690K|    13M|       |  6593   (1)| 0
+0:00:01 |
+
+|*  6 |    TABLE ACCESS FULL | LINEITEM |  3342K|    73M|       | 29654   (1)| 0
+0:00:02 |
+
+--------------------------------------------------------------------------------
+---------
+
+
+Predicate Information (identified by operation id):
+---------------------------------------------------
+
+   2 - access("L_ORDERKEY"="O_ORDERKEY")
+   3 - access("C_CUSTKEY"="O_CUSTKEY")
+   4 - filter("C_MKTSEGMENT"='BUILDING')
+   5 - filter("O_ORDERDATE"<TO_DATE(' 1995-03-15 00:00:00', 'syyyy-mm-dd
+              hh24:mi:ss'))
+   6 - filter("L_SHIPDATE">TO_DATE(' 1995-03-15 00:00:00', 'syyyy-mm-dd
+              hh24:mi:ss'))
+
+Note
+-----
+   - dynamic statistics used: dynamic sampling (level=2)
+   - 3 Sql Plan Directives used for this statement
+
+
+Statistics
+----------------------------------------------------------
+          0  recursive calls
+          0  db block gets
+     136153  consistent gets
+     108626  physical reads
+        248  redo size
+     446335  bytes sent via SQL*Net to client
+       9066  bytes received via SQL*Net from client
+        776  SQL*Net roundtrips to/from client
+          0  sorts (memory)
+          0  sorts (disk)
+      11620  rows processed
+
+Elapsed: 00:00:01.80
+
+Execution Plan
+----------------------------------------------------------
+Plan hash value: 2785378426
+
+--------------------------------------------------------------------------------
+---------
+
+| Id  | Operation            | Name     | Rows  | Bytes |TempSpc| Cost (%CPU)| T
+ime     |
+
+--------------------------------------------------------------------------------
+---------
+
+|   0 | SELECT STATEMENT     |          |   466K|    26M|       | 49910   (1)| 0
+0:00:02 |
+
+|   1 |  HASH GROUP BY       |          |   466K|    26M|    32M| 49910   (1)| 0
+0:00:02 |
+
+|*  2 |   HASH JOIN          |          |   466K|    26M|  9512K| 43208   (1)| 0
+0:00:02 |
+
+|*  3 |    HASH JOIN         |          |   198K|  7177K|       |  7544   (1)| 0
+0:00:01 |
+
+|*  4 |     TABLE ACCESS FULL| CUSTOMER | 28980 |   452K|       |   950   (1)| 0
+0:00:01 |
+
+|*  5 |     TABLE ACCESS FULL| ORDERS   |   690K|    13M|       |  6593   (1)| 0
+0:00:01 |
+
+|*  6 |    TABLE ACCESS FULL | LINEITEM |  3342K|    73M|       | 29654   (1)| 0
+0:00:02 |
+
+--------------------------------------------------------------------------------
+---------
+
+
+Predicate Information (identified by operation id):
+---------------------------------------------------
+
+   2 - access("L_ORDERKEY"="O_ORDERKEY")
+   3 - access("C_CUSTKEY"="O_CUSTKEY")
+   4 - filter("C_MKTSEGMENT"='BUILDING')
+   5 - filter("O_ORDERDATE"<TO_DATE(' 1995-03-15 00:00:00', 'syyyy-mm-dd
+              hh24:mi:ss'))
+   6 - filter("L_SHIPDATE">TO_DATE(' 1995-03-15 00:00:00', 'syyyy-mm-dd
+              hh24:mi:ss'))
+
+Note
+-----
+   - dynamic statistics used: dynamic sampling (level=2)
+   - 3 Sql Plan Directives used for this statement
+
+
+Statistics
+----------------------------------------------------------
+          0  recursive calls
+          0  db block gets
+     136149  consistent gets
+     113255  physical reads
+        124  redo size
+     446335  bytes sent via SQL*Net to client
+       9066  bytes received via SQL*Net from client
+        776  SQL*Net roundtrips to/from client
+          0  sorts (memory)
+          0  sorts (disk)
+      11620  rows processed

@@ -1,0 +1,444 @@
+Elapsed: 00:00:06.02
+
+Execution Plan
+----------------------------------------------------------
+Plan hash value: 342931248
+
+--------------------------------------------------------------------------------
+-------------------
+
+| Id  | Operation                       | Name            | Rows  | Bytes | Cost
+ (%CPU)| Time     |
+
+--------------------------------------------------------------------------------
+-------------------
+
+|   0 | SELECT STATEMENT                |                 |     4 |   456 | 8401
+9   (1)| 00:00:04 |
+
+|   1 |  HASH GROUP BY                  |                 |     4 |   456 | 8401
+9   (1)| 00:00:04 |
+
+|*  2 |   HASH JOIN                     |                 |     4 |   456 | 8401
+8   (1)| 00:00:04 |
+
+|*  3 |    HASH JOIN                    |                 |     1 |    88 | 5438
+4   (1)| 00:00:03 |
+
+|   4 |     NESTED LOOPS                |                 |     1 |    61 | 5343
+6   (1)| 00:00:03 |
+
+|   5 |      NESTED LOOPS               |                 |     1 |    61 | 5343
+6   (1)| 00:00:03 |
+
+|   6 |       VIEW                      | VW_NSO_1        |  4985K|    61M| 2975
+9   (1)| 00:00:02 |
+
+|*  7 |        FILTER                   |                 |       |       |
+       |          |
+
+|   8 |         HASH GROUP BY           |                 |     1 |   123M| 2975
+9   (1)| 00:00:02 |
+
+|   9 |          TABLE ACCESS FULL      | LINEITEM        |  4985K|   123M| 2961
+9   (1)| 00:00:02 |
+
+|* 10 |       INDEX RANGE SCAN          | ORDERS_ORDERKEY |     1 |       |
+2   (0)| 00:00:01 |
+
+|  11 |      TABLE ACCESS BY INDEX ROWID| ORDERS          |     1 |    48 |
+3   (0)| 00:00:01 |
+
+|  12 |     TABLE ACCESS FULL           | CUSTOMER        |   148K|  3917K|   94
+8   (1)| 00:00:01 |
+
+|  13 |    TABLE ACCESS FULL            | LINEITEM        |  4985K|   123M| 2961
+9   (1)| 00:00:02 |
+
+--------------------------------------------------------------------------------
+-------------------
+
+
+Predicate Information (identified by operation id):
+---------------------------------------------------
+
+   2 - access("O_ORDERKEY"="L_ORDERKEY")
+   3 - access("C_CUSTKEY"="O_CUSTKEY")
+   7 - filter(SUM("L_QUANTITY")>300)
+  10 - access("O_ORDERKEY"="L_ORDERKEY")
+
+Note
+-----
+   - dynamic statistics used: dynamic sampling (level=2)
+   - 1 Sql Plan Directive used for this statement
+
+
+Statistics
+----------------------------------------------------------
+         70  recursive calls
+          0  db block gets
+     230489  consistent gets
+     156310  physical reads
+        328  redo size
+       4367  bytes sent via SQL*Net to client
+        585  bytes received via SQL*Net from client
+          5  SQL*Net roundtrips to/from client
+          4  sorts (memory)
+          0  sorts (disk)
+         57  rows processed
+
+Elapsed: 00:00:09.35
+
+Execution Plan
+----------------------------------------------------------
+Plan hash value: 342931248
+
+--------------------------------------------------------------------------------
+-------------------
+
+| Id  | Operation                       | Name            | Rows  | Bytes | Cost
+ (%CPU)| Time     |
+
+--------------------------------------------------------------------------------
+-------------------
+
+|   0 | SELECT STATEMENT                |                 |     4 |   456 | 8401
+9   (1)| 00:00:04 |
+
+|   1 |  HASH GROUP BY                  |                 |     4 |   456 | 8401
+9   (1)| 00:00:04 |
+
+|*  2 |   HASH JOIN                     |                 |     4 |   456 | 8401
+8   (1)| 00:00:04 |
+
+|*  3 |    HASH JOIN                    |                 |     1 |    88 | 5438
+4   (1)| 00:00:03 |
+
+|   4 |     NESTED LOOPS                |                 |     1 |    61 | 5343
+6   (1)| 00:00:03 |
+
+|   5 |      NESTED LOOPS               |                 |     1 |    61 | 5343
+6   (1)| 00:00:03 |
+
+|   6 |       VIEW                      | VW_NSO_1        |  4985K|    61M| 2975
+9   (1)| 00:00:02 |
+
+|*  7 |        FILTER                   |                 |       |       |
+       |          |
+
+|   8 |         HASH GROUP BY           |                 |     1 |   123M| 2975
+9   (1)| 00:00:02 |
+
+|   9 |          TABLE ACCESS FULL      | LINEITEM        |  4985K|   123M| 2961
+9   (1)| 00:00:02 |
+
+|* 10 |       INDEX RANGE SCAN          | ORDERS_ORDERKEY |     1 |       |
+2   (0)| 00:00:01 |
+
+|  11 |      TABLE ACCESS BY INDEX ROWID| ORDERS          |     1 |    48 |
+3   (0)| 00:00:01 |
+
+|  12 |     TABLE ACCESS FULL           | CUSTOMER        |   148K|  3917K|   94
+8   (1)| 00:00:01 |
+
+|  13 |    TABLE ACCESS FULL            | LINEITEM        |  4985K|   123M| 2961
+9   (1)| 00:00:02 |
+
+--------------------------------------------------------------------------------
+-------------------
+
+
+Predicate Information (identified by operation id):
+---------------------------------------------------
+
+   2 - access("O_ORDERKEY"="L_ORDERKEY")
+   3 - access("C_CUSTKEY"="O_CUSTKEY")
+   7 - filter(SUM("L_QUANTITY")>300)
+  10 - access("O_ORDERKEY"="L_ORDERKEY")
+
+Note
+-----
+   - dynamic statistics used: dynamic sampling (level=2)
+   - 1 Sql Plan Directive used for this statement
+
+
+Statistics
+----------------------------------------------------------
+        122  recursive calls
+          0  db block gets
+     254392  consistent gets
+     183262  physical reads
+        328  redo size
+       4367  bytes sent via SQL*Net to client
+        585  bytes received via SQL*Net from client
+          5  SQL*Net roundtrips to/from client
+          4  sorts (memory)
+          0  sorts (disk)
+         57  rows processed
+
+Elapsed: 00:00:05.37
+
+Execution Plan
+----------------------------------------------------------
+Plan hash value: 342931248
+
+--------------------------------------------------------------------------------
+-------------------
+
+| Id  | Operation                       | Name            | Rows  | Bytes | Cost
+ (%CPU)| Time     |
+
+--------------------------------------------------------------------------------
+-------------------
+
+|   0 | SELECT STATEMENT                |                 |     4 |   456 | 8401
+9   (1)| 00:00:04 |
+
+|   1 |  HASH GROUP BY                  |                 |     4 |   456 | 8401
+9   (1)| 00:00:04 |
+
+|*  2 |   HASH JOIN                     |                 |     4 |   456 | 8401
+8   (1)| 00:00:04 |
+
+|*  3 |    HASH JOIN                    |                 |     1 |    88 | 5438
+4   (1)| 00:00:03 |
+
+|   4 |     NESTED LOOPS                |                 |     1 |    61 | 5343
+6   (1)| 00:00:03 |
+
+|   5 |      NESTED LOOPS               |                 |     1 |    61 | 5343
+6   (1)| 00:00:03 |
+
+|   6 |       VIEW                      | VW_NSO_1        |  4985K|    61M| 2975
+9   (1)| 00:00:02 |
+
+|*  7 |        FILTER                   |                 |       |       |
+       |          |
+
+|   8 |         HASH GROUP BY           |                 |     1 |   123M| 2975
+9   (1)| 00:00:02 |
+
+|   9 |          TABLE ACCESS FULL      | LINEITEM        |  4985K|   123M| 2961
+9   (1)| 00:00:02 |
+
+|* 10 |       INDEX RANGE SCAN          | ORDERS_ORDERKEY |     1 |       |
+2   (0)| 00:00:01 |
+
+|  11 |      TABLE ACCESS BY INDEX ROWID| ORDERS          |     1 |    48 |
+3   (0)| 00:00:01 |
+
+|  12 |     TABLE ACCESS FULL           | CUSTOMER        |   148K|  3917K|   94
+8   (1)| 00:00:01 |
+
+|  13 |    TABLE ACCESS FULL            | LINEITEM        |  4985K|   123M| 2961
+9   (1)| 00:00:02 |
+
+--------------------------------------------------------------------------------
+-------------------
+
+
+Predicate Information (identified by operation id):
+---------------------------------------------------
+
+   2 - access("O_ORDERKEY"="L_ORDERKEY")
+   3 - access("C_CUSTKEY"="O_CUSTKEY")
+   7 - filter(SUM("L_QUANTITY")>300)
+  10 - access("O_ORDERKEY"="L_ORDERKEY")
+
+Note
+-----
+   - dynamic statistics used: dynamic sampling (level=2)
+   - 1 Sql Plan Directive used for this statement
+
+
+Statistics
+----------------------------------------------------------
+         67  recursive calls
+          0  db block gets
+     230489  consistent gets
+     154082  physical reads
+        328  redo size
+       4367  bytes sent via SQL*Net to client
+        585  bytes received via SQL*Net from client
+          5  SQL*Net roundtrips to/from client
+          4  sorts (memory)
+          0  sorts (disk)
+         57  rows processed
+
+Elapsed: 00:00:05.14
+
+Execution Plan
+----------------------------------------------------------
+Plan hash value: 342931248
+
+--------------------------------------------------------------------------------
+-------------------
+
+| Id  | Operation                       | Name            | Rows  | Bytes | Cost
+ (%CPU)| Time     |
+
+--------------------------------------------------------------------------------
+-------------------
+
+|   0 | SELECT STATEMENT                |                 |     4 |   456 | 8401
+9   (1)| 00:00:04 |
+
+|   1 |  HASH GROUP BY                  |                 |     4 |   456 | 8401
+9   (1)| 00:00:04 |
+
+|*  2 |   HASH JOIN                     |                 |     4 |   456 | 8401
+8   (1)| 00:00:04 |
+
+|*  3 |    HASH JOIN                    |                 |     1 |    88 | 5438
+4   (1)| 00:00:03 |
+
+|   4 |     NESTED LOOPS                |                 |     1 |    61 | 5343
+6   (1)| 00:00:03 |
+
+|   5 |      NESTED LOOPS               |                 |     1 |    61 | 5343
+6   (1)| 00:00:03 |
+
+|   6 |       VIEW                      | VW_NSO_1        |  4985K|    61M| 2975
+9   (1)| 00:00:02 |
+
+|*  7 |        FILTER                   |                 |       |       |
+       |          |
+
+|   8 |         HASH GROUP BY           |                 |     1 |   123M| 2975
+9   (1)| 00:00:02 |
+
+|   9 |          TABLE ACCESS FULL      | LINEITEM        |  4985K|   123M| 2961
+9   (1)| 00:00:02 |
+
+|* 10 |       INDEX RANGE SCAN          | ORDERS_ORDERKEY |     1 |       |
+2   (0)| 00:00:01 |
+
+|  11 |      TABLE ACCESS BY INDEX ROWID| ORDERS          |     1 |    48 |
+3   (0)| 00:00:01 |
+
+|  12 |     TABLE ACCESS FULL           | CUSTOMER        |   148K|  3917K|   94
+8   (1)| 00:00:01 |
+
+|  13 |    TABLE ACCESS FULL            | LINEITEM        |  4985K|   123M| 2961
+9   (1)| 00:00:02 |
+
+--------------------------------------------------------------------------------
+-------------------
+
+
+Predicate Information (identified by operation id):
+---------------------------------------------------
+
+   2 - access("O_ORDERKEY"="L_ORDERKEY")
+   3 - access("C_CUSTKEY"="O_CUSTKEY")
+   7 - filter(SUM("L_QUANTITY")>300)
+  10 - access("O_ORDERKEY"="L_ORDERKEY")
+
+Note
+-----
+   - dynamic statistics used: dynamic sampling (level=2)
+   - 1 Sql Plan Directive used for this statement
+
+
+Statistics
+----------------------------------------------------------
+          0  recursive calls
+          0  db block gets
+     220902  consistent gets
+     154082  physical reads
+        328  redo size
+       4367  bytes sent via SQL*Net to client
+        585  bytes received via SQL*Net from client
+          5  SQL*Net roundtrips to/from client
+          0  sorts (memory)
+          0  sorts (disk)
+         57  rows processed
+
+Elapsed: 00:00:05.06
+
+Execution Plan
+----------------------------------------------------------
+Plan hash value: 342931248
+
+--------------------------------------------------------------------------------
+-------------------
+
+| Id  | Operation                       | Name            | Rows  | Bytes | Cost
+ (%CPU)| Time     |
+
+--------------------------------------------------------------------------------
+-------------------
+
+|   0 | SELECT STATEMENT                |                 |     4 |   456 | 8401
+9   (1)| 00:00:04 |
+
+|   1 |  HASH GROUP BY                  |                 |     4 |   456 | 8401
+9   (1)| 00:00:04 |
+
+|*  2 |   HASH JOIN                     |                 |     4 |   456 | 8401
+8   (1)| 00:00:04 |
+
+|*  3 |    HASH JOIN                    |                 |     1 |    88 | 5438
+4   (1)| 00:00:03 |
+
+|   4 |     NESTED LOOPS                |                 |     1 |    61 | 5343
+6   (1)| 00:00:03 |
+
+|   5 |      NESTED LOOPS               |                 |     1 |    61 | 5343
+6   (1)| 00:00:03 |
+
+|   6 |       VIEW                      | VW_NSO_1        |  4985K|    61M| 2975
+9   (1)| 00:00:02 |
+
+|*  7 |        FILTER                   |                 |       |       |
+       |          |
+
+|   8 |         HASH GROUP BY           |                 |     1 |   123M| 2975
+9   (1)| 00:00:02 |
+
+|   9 |          TABLE ACCESS FULL      | LINEITEM        |  4985K|   123M| 2961
+9   (1)| 00:00:02 |
+
+|* 10 |       INDEX RANGE SCAN          | ORDERS_ORDERKEY |     1 |       |
+2   (0)| 00:00:01 |
+
+|  11 |      TABLE ACCESS BY INDEX ROWID| ORDERS          |     1 |    48 |
+3   (0)| 00:00:01 |
+
+|  12 |     TABLE ACCESS FULL           | CUSTOMER        |   148K|  3917K|   94
+8   (1)| 00:00:01 |
+
+|  13 |    TABLE ACCESS FULL            | LINEITEM        |  4985K|   123M| 2961
+9   (1)| 00:00:02 |
+
+--------------------------------------------------------------------------------
+-------------------
+
+
+Predicate Information (identified by operation id):
+---------------------------------------------------
+
+   2 - access("O_ORDERKEY"="L_ORDERKEY")
+   3 - access("C_CUSTKEY"="O_CUSTKEY")
+   7 - filter(SUM("L_QUANTITY")>300)
+  10 - access("O_ORDERKEY"="L_ORDERKEY")
+
+Note
+-----
+   - dynamic statistics used: dynamic sampling (level=2)
+   - 1 Sql Plan Directive used for this statement
+
+
+Statistics
+----------------------------------------------------------
+          0  recursive calls
+          0  db block gets
+     220902  consistent gets
+     154081  physical reads
+        328  redo size
+       4367  bytes sent via SQL*Net to client
+        585  bytes received via SQL*Net from client
+          5  SQL*Net roundtrips to/from client
+          0  sorts (memory)
+          0  sorts (disk)
+         57  rows processed
