@@ -1,5 +1,20 @@
 Part 1
-
+Query 1
+Looks great. Super quick. An index would probably speed up the query though. Index on shipdate.
+Query 3
+Query plan seems fine. Uses customer join on orders then join on lineitem to save time.
+A materialized view on lineitem would save time. We use it in almost all the queries as well so it would be
+worthwhile.
+Query 5
+A bottle neck is the join on lineitem. Maybe join all other tables first then do the join so that there
+are fewer tuples to join.
+Query 6
+Looks great. Super quick. An index would probably speed up the query though.
+Query 18
+Maybe check the statistics for whether filtering lineitem is better than doing the join on customer or orders.
+If the result of either join is smaller than the filtering should change plan.
+Query 22
+Accesses customer table twice. Can make a materialized view if this is necessary. Index on shipdate.
 
 Part 2
 
