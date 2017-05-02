@@ -1,0 +1,509 @@
+Elapsed: 00:00:02.15
+
+Execution Plan
+----------------------------------------------------------
+Plan hash value: 423460654
+
+--------------------------------------------------------------------------------
+-----------------
+
+| Id  | Operation                   | Name      | Rows  | Bytes |TempSpc| Cost (
+%CPU)| Time     |
+
+--------------------------------------------------------------------------------
+-----------------
+
+|   0 | SELECT STATEMENT            |           |    25 |  2000 |       | 42414
+  (1)| 00:00:02 |
+
+|   1 |  HASH GROUP BY              |           |    25 |  2000 |       | 42414
+  (1)| 00:00:02 |
+
+|*  2 |   HASH JOIN                 |           |  7306 |   570K|  2640K| 42413
+  (1)| 00:00:02 |
+
+|   3 |    TABLE ACCESS FULL        | CUSTOMER  |   150K|   878K|       |   949
+  (1)| 00:00:01 |
+
+|*  4 |    HASH JOIN                |           |   182K|    12M|  6248K| 40592
+  (1)| 00:00:02 |
+
+|*  5 |     TABLE ACCESS FULL       | ORDERS    |   228K|  3566K|       |  6593
+  (1)| 00:00:01 |
+
+|*  6 |     HASH JOIN               |           |  1200K|    66M|       | 29717
+  (1)| 00:00:02 |
+
+|   7 |      VIEW                   | VW_GBF_35 |  2000 | 86000 |       |    68
+  (2)| 00:00:01 |
+
+|   8 |       HASH GROUP BY         |           |  2000 |   119K|       |    68
+  (2)| 00:00:01 |
+
+|*  9 |        HASH JOIN            |           |  2000 |   119K|       |    67
+  (0)| 00:00:01 |
+
+|  10 |         TABLE ACCESS FULL   | NATION    |    25 |   725 |       |     3
+  (0)| 00:00:01 |
+
+|  11 |         MERGE JOIN CARTESIAN|           | 10000 |   312K|       |    64
+  (0)| 00:00:01 |
+
+|* 12 |          TABLE ACCESS FULL  | REGION    |     1 |    27 |       |     3
+  (0)| 00:00:01 |
+
+|  13 |          BUFFER SORT        |           | 10000 | 50000 |       |    61
+  (0)| 00:00:01 |
+
+|  14 |           TABLE ACCESS FULL | SUPPLIER  | 10000 | 50000 |       |    61
+  (0)| 00:00:01 |
+
+|  15 |      TABLE ACCESS FULL      | LINEITEM  |  6001K|    85M|       | 29632
+  (1)| 00:00:02 |
+
+--------------------------------------------------------------------------------
+-----------------
+
+
+Predicate Information (identified by operation id):
+---------------------------------------------------
+
+   2 - access("C_CUSTKEY"="O_CUSTKEY" AND "C_NATIONKEY"="ITEM_1")
+   4 - access("L_ORDERKEY"="O_ORDERKEY")
+   5 - filter("O_ORDERDATE"<TO_DATE(' 1995-01-01 00:00:00', 'syyyy-mm-dd hh24:mi
+:ss')
+
+              AND "O_ORDERDATE">=TO_DATE(' 1994-01-01 00:00:00', 'syyyy-mm-dd hh
+24:mi:ss'))
+
+   6 - access("L_SUPPKEY"="ITEM_2")
+   9 - access("N_REGIONKEY"="R_REGIONKEY" AND "S_NATIONKEY"="N_NATIONKEY")
+  12 - filter("R_NAME"='ASIA')
+
+Note
+-----
+   - dynamic statistics used: dynamic sampling (level=2)
+   - 1 Sql Plan Directive used for this statement
+
+
+Statistics
+----------------------------------------------------------
+        103  recursive calls
+          0  db block gets
+     136902  consistent gets
+     112068  physical reads
+        248  redo size
+        842  bytes sent via SQL*Net to client
+        552  bytes received via SQL*Net from client
+          2  SQL*Net roundtrips to/from client
+          3  sorts (memory)
+          0  sorts (disk)
+          5  rows processed
+
+Elapsed: 00:00:02.06
+
+Execution Plan
+----------------------------------------------------------
+Plan hash value: 423460654
+
+--------------------------------------------------------------------------------
+-----------------
+
+| Id  | Operation                   | Name      | Rows  | Bytes |TempSpc| Cost (
+%CPU)| Time     |
+
+--------------------------------------------------------------------------------
+-----------------
+
+|   0 | SELECT STATEMENT            |           |    25 |  2000 |       | 42414
+  (1)| 00:00:02 |
+
+|   1 |  HASH GROUP BY              |           |    25 |  2000 |       | 42414
+  (1)| 00:00:02 |
+
+|*  2 |   HASH JOIN                 |           |  7306 |   570K|  2640K| 42413
+  (1)| 00:00:02 |
+
+|   3 |    TABLE ACCESS FULL        | CUSTOMER  |   150K|   878K|       |   949
+  (1)| 00:00:01 |
+
+|*  4 |    HASH JOIN                |           |   182K|    12M|  6248K| 40592
+  (1)| 00:00:02 |
+
+|*  5 |     TABLE ACCESS FULL       | ORDERS    |   228K|  3566K|       |  6593
+  (1)| 00:00:01 |
+
+|*  6 |     HASH JOIN               |           |  1200K|    66M|       | 29717
+  (1)| 00:00:02 |
+
+|   7 |      VIEW                   | VW_GBF_35 |  2000 | 86000 |       |    68
+  (2)| 00:00:01 |
+
+|   8 |       HASH GROUP BY         |           |  2000 |   119K|       |    68
+  (2)| 00:00:01 |
+
+|*  9 |        HASH JOIN            |           |  2000 |   119K|       |    67
+  (0)| 00:00:01 |
+
+|  10 |         TABLE ACCESS FULL   | NATION    |    25 |   725 |       |     3
+  (0)| 00:00:01 |
+
+|  11 |         MERGE JOIN CARTESIAN|           | 10000 |   312K|       |    64
+  (0)| 00:00:01 |
+
+|* 12 |          TABLE ACCESS FULL  | REGION    |     1 |    27 |       |     3
+  (0)| 00:00:01 |
+
+|  13 |          BUFFER SORT        |           | 10000 | 50000 |       |    61
+  (0)| 00:00:01 |
+
+|  14 |           TABLE ACCESS FULL | SUPPLIER  | 10000 | 50000 |       |    61
+  (0)| 00:00:01 |
+
+|  15 |      TABLE ACCESS FULL      | LINEITEM  |  6001K|    85M|       | 29632
+  (1)| 00:00:02 |
+
+--------------------------------------------------------------------------------
+-----------------
+
+
+Predicate Information (identified by operation id):
+---------------------------------------------------
+
+   2 - access("C_CUSTKEY"="O_CUSTKEY" AND "C_NATIONKEY"="ITEM_1")
+   4 - access("L_ORDERKEY"="O_ORDERKEY")
+   5 - filter("O_ORDERDATE"<TO_DATE(' 1995-01-01 00:00:00', 'syyyy-mm-dd hh24:mi
+:ss')
+
+              AND "O_ORDERDATE">=TO_DATE(' 1994-01-01 00:00:00', 'syyyy-mm-dd hh
+24:mi:ss'))
+
+   6 - access("L_SUPPKEY"="ITEM_2")
+   9 - access("N_REGIONKEY"="R_REGIONKEY" AND "S_NATIONKEY"="N_NATIONKEY")
+  12 - filter("R_NAME"='ASIA')
+
+Note
+-----
+   - dynamic statistics used: dynamic sampling (level=2)
+   - 1 Sql Plan Directive used for this statement
+
+
+Statistics
+----------------------------------------------------------
+         43  recursive calls
+          0  db block gets
+     136618  consistent gets
+     112053  physical reads
+        248  redo size
+        842  bytes sent via SQL*Net to client
+        552  bytes received via SQL*Net from client
+          2  SQL*Net roundtrips to/from client
+          2  sorts (memory)
+          0  sorts (disk)
+          5  rows processed
+
+Elapsed: 00:00:02.14
+
+Execution Plan
+----------------------------------------------------------
+Plan hash value: 423460654
+
+--------------------------------------------------------------------------------
+-----------------
+
+| Id  | Operation                   | Name      | Rows  | Bytes |TempSpc| Cost (
+%CPU)| Time     |
+
+--------------------------------------------------------------------------------
+-----------------
+
+|   0 | SELECT STATEMENT            |           |    25 |  2000 |       | 42414
+  (1)| 00:00:02 |
+
+|   1 |  HASH GROUP BY              |           |    25 |  2000 |       | 42414
+  (1)| 00:00:02 |
+
+|*  2 |   HASH JOIN                 |           |  7306 |   570K|  2640K| 42413
+  (1)| 00:00:02 |
+
+|   3 |    TABLE ACCESS FULL        | CUSTOMER  |   150K|   878K|       |   949
+  (1)| 00:00:01 |
+
+|*  4 |    HASH JOIN                |           |   182K|    12M|  6248K| 40592
+  (1)| 00:00:02 |
+
+|*  5 |     TABLE ACCESS FULL       | ORDERS    |   228K|  3566K|       |  6593
+  (1)| 00:00:01 |
+
+|*  6 |     HASH JOIN               |           |  1200K|    66M|       | 29717
+  (1)| 00:00:02 |
+
+|   7 |      VIEW                   | VW_GBF_35 |  2000 | 86000 |       |    68
+  (2)| 00:00:01 |
+
+|   8 |       HASH GROUP BY         |           |  2000 |   119K|       |    68
+  (2)| 00:00:01 |
+
+|*  9 |        HASH JOIN            |           |  2000 |   119K|       |    67
+  (0)| 00:00:01 |
+
+|  10 |         TABLE ACCESS FULL   | NATION    |    25 |   725 |       |     3
+  (0)| 00:00:01 |
+
+|  11 |         MERGE JOIN CARTESIAN|           | 10000 |   312K|       |    64
+  (0)| 00:00:01 |
+
+|* 12 |          TABLE ACCESS FULL  | REGION    |     1 |    27 |       |     3
+  (0)| 00:00:01 |
+
+|  13 |          BUFFER SORT        |           | 10000 | 50000 |       |    61
+  (0)| 00:00:01 |
+
+|  14 |           TABLE ACCESS FULL | SUPPLIER  | 10000 | 50000 |       |    61
+  (0)| 00:00:01 |
+
+|  15 |      TABLE ACCESS FULL      | LINEITEM  |  6001K|    85M|       | 29632
+  (1)| 00:00:02 |
+
+--------------------------------------------------------------------------------
+-----------------
+
+
+Predicate Information (identified by operation id):
+---------------------------------------------------
+
+   2 - access("C_CUSTKEY"="O_CUSTKEY" AND "C_NATIONKEY"="ITEM_1")
+   4 - access("L_ORDERKEY"="O_ORDERKEY")
+   5 - filter("O_ORDERDATE"<TO_DATE(' 1995-01-01 00:00:00', 'syyyy-mm-dd hh24:mi
+:ss')
+
+              AND "O_ORDERDATE">=TO_DATE(' 1994-01-01 00:00:00', 'syyyy-mm-dd hh
+24:mi:ss'))
+
+   6 - access("L_SUPPKEY"="ITEM_2")
+   9 - access("N_REGIONKEY"="R_REGIONKEY" AND "S_NATIONKEY"="N_NATIONKEY")
+  12 - filter("R_NAME"='ASIA')
+
+Note
+-----
+   - dynamic statistics used: dynamic sampling (level=2)
+   - 1 Sql Plan Directive used for this statement
+
+
+Statistics
+----------------------------------------------------------
+         38  recursive calls
+          0  db block gets
+     136842  consistent gets
+     112053  physical reads
+        248  redo size
+        842  bytes sent via SQL*Net to client
+        552  bytes received via SQL*Net from client
+          2  SQL*Net roundtrips to/from client
+          3  sorts (memory)
+          0  sorts (disk)
+          5  rows processed
+
+Elapsed: 00:00:01.99
+
+Execution Plan
+----------------------------------------------------------
+Plan hash value: 423460654
+
+--------------------------------------------------------------------------------
+-----------------
+
+| Id  | Operation                   | Name      | Rows  | Bytes |TempSpc| Cost (
+%CPU)| Time     |
+
+--------------------------------------------------------------------------------
+-----------------
+
+|   0 | SELECT STATEMENT            |           |    25 |  2000 |       | 42414
+  (1)| 00:00:02 |
+
+|   1 |  HASH GROUP BY              |           |    25 |  2000 |       | 42414
+  (1)| 00:00:02 |
+
+|*  2 |   HASH JOIN                 |           |  7306 |   570K|  2640K| 42413
+  (1)| 00:00:02 |
+
+|   3 |    TABLE ACCESS FULL        | CUSTOMER  |   150K|   878K|       |   949
+  (1)| 00:00:01 |
+
+|*  4 |    HASH JOIN                |           |   182K|    12M|  6248K| 40592
+  (1)| 00:00:02 |
+
+|*  5 |     TABLE ACCESS FULL       | ORDERS    |   228K|  3566K|       |  6593
+  (1)| 00:00:01 |
+
+|*  6 |     HASH JOIN               |           |  1200K|    66M|       | 29717
+  (1)| 00:00:02 |
+
+|   7 |      VIEW                   | VW_GBF_35 |  2000 | 86000 |       |    68
+  (2)| 00:00:01 |
+
+|   8 |       HASH GROUP BY         |           |  2000 |   119K|       |    68
+  (2)| 00:00:01 |
+
+|*  9 |        HASH JOIN            |           |  2000 |   119K|       |    67
+  (0)| 00:00:01 |
+
+|  10 |         TABLE ACCESS FULL   | NATION    |    25 |   725 |       |     3
+  (0)| 00:00:01 |
+
+|  11 |         MERGE JOIN CARTESIAN|           | 10000 |   312K|       |    64
+  (0)| 00:00:01 |
+
+|* 12 |          TABLE ACCESS FULL  | REGION    |     1 |    27 |       |     3
+  (0)| 00:00:01 |
+
+|  13 |          BUFFER SORT        |           | 10000 | 50000 |       |    61
+  (0)| 00:00:01 |
+
+|  14 |           TABLE ACCESS FULL | SUPPLIER  | 10000 | 50000 |       |    61
+  (0)| 00:00:01 |
+
+|  15 |      TABLE ACCESS FULL      | LINEITEM  |  6001K|    85M|       | 29632
+  (1)| 00:00:02 |
+
+--------------------------------------------------------------------------------
+-----------------
+
+
+Predicate Information (identified by operation id):
+---------------------------------------------------
+
+   2 - access("C_CUSTKEY"="O_CUSTKEY" AND "C_NATIONKEY"="ITEM_1")
+   4 - access("L_ORDERKEY"="O_ORDERKEY")
+   5 - filter("O_ORDERDATE"<TO_DATE(' 1995-01-01 00:00:00', 'syyyy-mm-dd hh24:mi
+:ss')
+
+              AND "O_ORDERDATE">=TO_DATE(' 1994-01-01 00:00:00', 'syyyy-mm-dd hh
+24:mi:ss'))
+
+   6 - access("L_SUPPKEY"="ITEM_2")
+   9 - access("N_REGIONKEY"="R_REGIONKEY" AND "S_NATIONKEY"="N_NATIONKEY")
+  12 - filter("R_NAME"='ASIA')
+
+Note
+-----
+   - dynamic statistics used: dynamic sampling (level=2)
+   - 1 Sql Plan Directive used for this statement
+
+
+Statistics
+----------------------------------------------------------
+          0  recursive calls
+          0  db block gets
+     136376  consistent gets
+     112053  physical reads
+        248  redo size
+        842  bytes sent via SQL*Net to client
+        552  bytes received via SQL*Net from client
+          2  SQL*Net roundtrips to/from client
+          1  sorts (memory)
+          0  sorts (disk)
+          5  rows processed
+
+Elapsed: 00:00:01.85
+
+Execution Plan
+----------------------------------------------------------
+Plan hash value: 423460654
+
+--------------------------------------------------------------------------------
+-----------------
+
+| Id  | Operation                   | Name      | Rows  | Bytes |TempSpc| Cost (
+%CPU)| Time     |
+
+--------------------------------------------------------------------------------
+-----------------
+
+|   0 | SELECT STATEMENT            |           |    25 |  2000 |       | 42414
+  (1)| 00:00:02 |
+
+|   1 |  HASH GROUP BY              |           |    25 |  2000 |       | 42414
+  (1)| 00:00:02 |
+
+|*  2 |   HASH JOIN                 |           |  7306 |   570K|  2640K| 42413
+  (1)| 00:00:02 |
+
+|   3 |    TABLE ACCESS FULL        | CUSTOMER  |   150K|   878K|       |   949
+  (1)| 00:00:01 |
+
+|*  4 |    HASH JOIN                |           |   182K|    12M|  6248K| 40592
+  (1)| 00:00:02 |
+
+|*  5 |     TABLE ACCESS FULL       | ORDERS    |   228K|  3566K|       |  6593
+  (1)| 00:00:01 |
+
+|*  6 |     HASH JOIN               |           |  1200K|    66M|       | 29717
+  (1)| 00:00:02 |
+
+|   7 |      VIEW                   | VW_GBF_35 |  2000 | 86000 |       |    68
+  (2)| 00:00:01 |
+
+|   8 |       HASH GROUP BY         |           |  2000 |   119K|       |    68
+  (2)| 00:00:01 |
+
+|*  9 |        HASH JOIN            |           |  2000 |   119K|       |    67
+  (0)| 00:00:01 |
+
+|  10 |         TABLE ACCESS FULL   | NATION    |    25 |   725 |       |     3
+  (0)| 00:00:01 |
+
+|  11 |         MERGE JOIN CARTESIAN|           | 10000 |   312K|       |    64
+  (0)| 00:00:01 |
+
+|* 12 |          TABLE ACCESS FULL  | REGION    |     1 |    27 |       |     3
+  (0)| 00:00:01 |
+
+|  13 |          BUFFER SORT        |           | 10000 | 50000 |       |    61
+  (0)| 00:00:01 |
+
+|  14 |           TABLE ACCESS FULL | SUPPLIER  | 10000 | 50000 |       |    61
+  (0)| 00:00:01 |
+
+|  15 |      TABLE ACCESS FULL      | LINEITEM  |  6001K|    85M|       | 29632
+  (1)| 00:00:02 |
+
+--------------------------------------------------------------------------------
+-----------------
+
+
+Predicate Information (identified by operation id):
+---------------------------------------------------
+
+   2 - access("C_CUSTKEY"="O_CUSTKEY" AND "C_NATIONKEY"="ITEM_1")
+   4 - access("L_ORDERKEY"="O_ORDERKEY")
+   5 - filter("O_ORDERDATE"<TO_DATE(' 1995-01-01 00:00:00', 'syyyy-mm-dd hh24:mi
+:ss')
+
+              AND "O_ORDERDATE">=TO_DATE(' 1994-01-01 00:00:00', 'syyyy-mm-dd hh
+24:mi:ss'))
+
+   6 - access("L_SUPPKEY"="ITEM_2")
+   9 - access("N_REGIONKEY"="R_REGIONKEY" AND "S_NATIONKEY"="N_NATIONKEY")
+  12 - filter("R_NAME"='ASIA')
+
+Note
+-----
+   - dynamic statistics used: dynamic sampling (level=2)
+   - 1 Sql Plan Directive used for this statement
+
+
+Statistics
+----------------------------------------------------------
+          0  recursive calls
+          0  db block gets
+     136376  consistent gets
+     112053  physical reads
+        248  redo size
+        842  bytes sent via SQL*Net to client
+        552  bytes received via SQL*Net from client
+          2  SQL*Net roundtrips to/from client
+          1  sorts (memory)
+          0  sorts (disk)
+          5  rows processed

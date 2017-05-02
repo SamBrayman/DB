@@ -1,4 +1,4 @@
-Elapsed: 00:00:04.91
+Elapsed: 00:00:04.58
 
 Execution Plan
 ----------------------------------------------------------
@@ -7,9 +7,9 @@ Plan hash value: 1773397105
 -------------------------------------------------------------------------------
 | Id  | Operation          | Name     | Rows  | Bytes | Cost (%CPU)| Time     |
 -------------------------------------------------------------------------------
-|   0 | SELECT STATEMENT   |          |     5 |   100 | 29817   (1)| 00:00:02 |
-|   1 |  HASH GROUP BY     |          |     5 |   100 | 29817   (1)| 00:00:02 |
-|*  2 |   TABLE ACCESS FULL| LINEITEM |  5789K|   110M| 29654   (1)| 00:00:02 |
+|   0 | SELECT STATEMENT   |          |     5 |   135 | 29826   (1)| 00:00:02 |
+|   1 |  HASH GROUP BY     |          |     5 |   135 | 29826   (1)| 00:00:02 |
+|*  2 |   TABLE ACCESS FULL| LINEITEM |  6072K|   156M| 29654   (1)| 00:00:02 |
 -------------------------------------------------------------------------------
 
 Predicate Information (identified by operation id):
@@ -17,23 +17,28 @@ Predicate Information (identified by operation id):
 
    2 - filter("L_SHIPDATE"<=TO_DATE(' 1998-09-02 00:00:00',
               'syyyy-mm-dd hh24:mi:ss'))
+
+Note
+-----
+   - dynamic statistics used: dynamic sampling (level=2)
+   - 1 Sql Plan Directive used for this statement
 
 
 Statistics
 ----------------------------------------------------------
-          0  recursive calls
+         86  recursive calls
           0  db block gets
-     108633  consistent gets
-     108626  physical reads
-          0  redo size
+     109573  consistent gets
+     108953  physical reads
+        124  redo size
        1694  bytes sent via SQL*Net to client
         552  bytes received via SQL*Net from client
           2  SQL*Net roundtrips to/from client
-          0  sorts (memory)
+          6  sorts (memory)
           0  sorts (disk)
           4  rows processed
 
-Elapsed: 00:00:04.86
+Elapsed: 00:00:04.56
 
 Execution Plan
 ----------------------------------------------------------
@@ -42,9 +47,9 @@ Plan hash value: 1773397105
 -------------------------------------------------------------------------------
 | Id  | Operation          | Name     | Rows  | Bytes | Cost (%CPU)| Time     |
 -------------------------------------------------------------------------------
-|   0 | SELECT STATEMENT   |          |     5 |   100 | 29817   (1)| 00:00:02 |
-|   1 |  HASH GROUP BY     |          |     5 |   100 | 29817   (1)| 00:00:02 |
-|*  2 |   TABLE ACCESS FULL| LINEITEM |  5789K|   110M| 29654   (1)| 00:00:02 |
+|   0 | SELECT STATEMENT   |          |     5 |   135 | 29826   (1)| 00:00:02 |
+|   1 |  HASH GROUP BY     |          |     5 |   135 | 29826   (1)| 00:00:02 |
+|*  2 |   TABLE ACCESS FULL| LINEITEM |  6072K|   156M| 29654   (1)| 00:00:02 |
 -------------------------------------------------------------------------------
 
 Predicate Information (identified by operation id):
@@ -53,40 +58,10 @@ Predicate Information (identified by operation id):
    2 - filter("L_SHIPDATE"<=TO_DATE(' 1998-09-02 00:00:00',
               'syyyy-mm-dd hh24:mi:ss'))
 
-
-Statistics
-----------------------------------------------------------
-          0  recursive calls
-          0  db block gets
-     108633  consistent gets
-     108626  physical reads
-          0  redo size
-       1694  bytes sent via SQL*Net to client
-        552  bytes received via SQL*Net from client
-          2  SQL*Net roundtrips to/from client
-          0  sorts (memory)
-          0  sorts (disk)
-          4  rows processed
-
-Elapsed: 00:00:04.57
-
-Execution Plan
-----------------------------------------------------------
-Plan hash value: 1773397105
-
--------------------------------------------------------------------------------
-| Id  | Operation          | Name     | Rows  | Bytes | Cost (%CPU)| Time     |
--------------------------------------------------------------------------------
-|   0 | SELECT STATEMENT   |          |     5 |   100 | 29817   (1)| 00:00:02 |
-|   1 |  HASH GROUP BY     |          |     5 |   100 | 29817   (1)| 00:00:02 |
-|*  2 |   TABLE ACCESS FULL| LINEITEM |  5789K|   110M| 29654   (1)| 00:00:02 |
--------------------------------------------------------------------------------
-
-Predicate Information (identified by operation id):
----------------------------------------------------
-
-   2 - filter("L_SHIPDATE"<=TO_DATE(' 1998-09-02 00:00:00',
-              'syyyy-mm-dd hh24:mi:ss'))
+Note
+-----
+   - dynamic statistics used: dynamic sampling (level=2)
+   - 1 Sql Plan Directive used for this statement
 
 
 Statistics
@@ -112,9 +87,9 @@ Plan hash value: 1773397105
 -------------------------------------------------------------------------------
 | Id  | Operation          | Name     | Rows  | Bytes | Cost (%CPU)| Time     |
 -------------------------------------------------------------------------------
-|   0 | SELECT STATEMENT   |          |     5 |   100 | 29817   (1)| 00:00:02 |
-|   1 |  HASH GROUP BY     |          |     5 |   100 | 29817   (1)| 00:00:02 |
-|*  2 |   TABLE ACCESS FULL| LINEITEM |  5789K|   110M| 29654   (1)| 00:00:02 |
+|   0 | SELECT STATEMENT   |          |     5 |   135 | 29826   (1)| 00:00:02 |
+|   1 |  HASH GROUP BY     |          |     5 |   135 | 29826   (1)| 00:00:02 |
+|*  2 |   TABLE ACCESS FULL| LINEITEM |  6072K|   156M| 29654   (1)| 00:00:02 |
 -------------------------------------------------------------------------------
 
 Predicate Information (identified by operation id):
@@ -122,6 +97,11 @@ Predicate Information (identified by operation id):
 
    2 - filter("L_SHIPDATE"<=TO_DATE(' 1998-09-02 00:00:00',
               'syyyy-mm-dd hh24:mi:ss'))
+
+Note
+-----
+   - dynamic statistics used: dynamic sampling (level=2)
+   - 1 Sql Plan Directive used for this statement
 
 
 Statistics
@@ -138,7 +118,7 @@ Statistics
           0  sorts (disk)
           4  rows processed
 
-Elapsed: 00:00:05.02
+Elapsed: 00:00:04.69
 
 Execution Plan
 ----------------------------------------------------------
@@ -147,9 +127,9 @@ Plan hash value: 1773397105
 -------------------------------------------------------------------------------
 | Id  | Operation          | Name     | Rows  | Bytes | Cost (%CPU)| Time     |
 -------------------------------------------------------------------------------
-|   0 | SELECT STATEMENT   |          |     5 |   100 | 29817   (1)| 00:00:02 |
-|   1 |  HASH GROUP BY     |          |     5 |   100 | 29817   (1)| 00:00:02 |
-|*  2 |   TABLE ACCESS FULL| LINEITEM |  5789K|   110M| 29654   (1)| 00:00:02 |
+|   0 | SELECT STATEMENT   |          |     5 |   135 | 29826   (1)| 00:00:02 |
+|   1 |  HASH GROUP BY     |          |     5 |   135 | 29826   (1)| 00:00:02 |
+|*  2 |   TABLE ACCESS FULL| LINEITEM |  6072K|   156M| 29654   (1)| 00:00:02 |
 -------------------------------------------------------------------------------
 
 Predicate Information (identified by operation id):
@@ -157,6 +137,51 @@ Predicate Information (identified by operation id):
 
    2 - filter("L_SHIPDATE"<=TO_DATE(' 1998-09-02 00:00:00',
               'syyyy-mm-dd hh24:mi:ss'))
+
+Note
+-----
+   - dynamic statistics used: dynamic sampling (level=2)
+   - 1 Sql Plan Directive used for this statement
+
+
+Statistics
+----------------------------------------------------------
+          0  recursive calls
+          0  db block gets
+     108633  consistent gets
+     108626  physical reads
+          0  redo size
+       1694  bytes sent via SQL*Net to client
+        552  bytes received via SQL*Net from client
+          2  SQL*Net roundtrips to/from client
+          0  sorts (memory)
+          0  sorts (disk)
+          4  rows processed
+
+Elapsed: 00:00:04.53
+
+Execution Plan
+----------------------------------------------------------
+Plan hash value: 1773397105
+
+-------------------------------------------------------------------------------
+| Id  | Operation          | Name     | Rows  | Bytes | Cost (%CPU)| Time     |
+-------------------------------------------------------------------------------
+|   0 | SELECT STATEMENT   |          |     5 |   135 | 29826   (1)| 00:00:02 |
+|   1 |  HASH GROUP BY     |          |     5 |   135 | 29826   (1)| 00:00:02 |
+|*  2 |   TABLE ACCESS FULL| LINEITEM |  6072K|   156M| 29654   (1)| 00:00:02 |
+-------------------------------------------------------------------------------
+
+Predicate Information (identified by operation id):
+---------------------------------------------------
+
+   2 - filter("L_SHIPDATE"<=TO_DATE(' 1998-09-02 00:00:00',
+              'syyyy-mm-dd hh24:mi:ss'))
+
+Note
+-----
+   - dynamic statistics used: dynamic sampling (level=2)
+   - 1 Sql Plan Directive used for this statement
 
 
 Statistics

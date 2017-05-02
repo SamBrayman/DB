@@ -1,3 +1,17 @@
+Part 1
+
+
+Part 2
+
+Part 3
+
+Materialized views would have been used, but since they weren't available they were omitted.
+Parallelization can only help speed up processing tuples.
+Statistics should only be used on joins with large numbers of relations since join optimization takes time.
+The indexes didn't help very much likeyl due to the nature of the fields in the tables. If the fields
+aren't unique the program will have to travel along the index until it finds the right tuple. If the fields are 
+unique, but you need all of them, the index doesn't help very much.
+
 A materialized view on shipdate would reduce access costs thereby decreasing running time.
 Parallel processing would also speed up processing tuples.
 alter table lineitem parallel 4;
@@ -45,3 +59,27 @@ We will use parallel processing to speed up processing tuples.
 create materialized view customer_orders enable query rewrite as select * from customer, orders where c_custkey = o_ocustkey;
 alter table customer parallel 4;
 alter table orders parallel 4;
+
+Results
+Query 1 optimized did marginally better than the normal query. This is likely due to random underlying speed decay
+due to others on the system.
+Query 3 optimized did better than the normal query. Parallelizing the tables likely sped up the processing time. The
+optimized query used fewer steps than the normal query based on the query plans. This likely sped up the query.
+Query 5 optimized did better than the normal query. Query 5 optimized used fewer steps than the normal query.
+The redo size and number of recursive calls for the normal query were also larger. These factors, in particular,
+the number of recursice calls likely slowed down the normal query.
+Query 6 optimized did worse than the normal query. We had more recursive calls in the optimized query likely
+slowing down the query. However, we did have fewer physical reads so if memory was a constraint, parallelization
+would be desirable.
+Query 18 optimized did worse than the normal query. The optimized query used parallelization. This likely caused
+an increase of 270 in the redo size. It also opened up the system to being slowed down by others doing parallel
+proessing. These factors likely caused the query to slow down. 
+Query 22 did worse than the normal query. The normal query had fewer recursive calls likely speeding up 
+the process. Paralellization did help with the number of physical reads though so if we were short on memory, 
+parallelization would probably be better despite being slightly slower.
+
+Parallelization helps in terms of the number of physical reads so if memory is a constraint this option should 
+be considered. It does however slow down processes like aggregations.
+Statistics were some of the best tools for speeding up queries in general. Taking into account the amount of time
+it takes to create and maintain these statistics would however decrease their increase in speed, especially on large
+relations like lineitem and orders.
