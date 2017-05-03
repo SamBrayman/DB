@@ -1,6 +1,6 @@
 ********************** Part 1 **********************
 
-*********** Query 1 ***********
+*********** Query 1 **********
 Looks great. Super quick.  Notice the filter:
 	
 	filter("L_SHIPDATE"<=TO_DATE(' 1998-09-02 00:00:00',
