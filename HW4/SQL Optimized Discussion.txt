@@ -1,29 +1,67 @@
-Part 1
-Query 1
-Looks great. Super quick. An index would probably speed up the query though. Index on shipdate.
-Query 3
+********************** Part 1 **********************
+
+*********** Query 1 ***********
+Looks great. Super quick.  Notice the filter:
+	
+	filter("L_SHIPDATE"<=TO_DATE(' 1998-09-02 00:00:00',
+              'syyyy-mm-dd hh24:mi:ss'))
+
+This filter will reduce the number of records, improving runtime somewhat.  An index would probably speed up the query though. Index on shipdate.
+
+*********** Query 3 ***********
 Query plan seems fine. Uses customer join on orders then join on lineitem to save time.
 A materialized view on lineitem would save time. We use it in almost all the queries as well so it would be
 worthwhile.
-Query 5
+
+*********** Query 5 ***********
 A bottle neck is the join on lineitem. Maybe join all other tables first then do the join so that there
 are fewer tuples to join.
-Query 6
-Looks great. Super quick. An index would probably speed up the query though.
-Query 18
-Maybe check the statistics for whether filtering lineitem is better than doing the join on customer or orders.
+
+*********** Query 6 ***********
+Looks great. There is only one filter for the query- everything is now contained in a single filter. ‘AND’s are used to merge them into one filter.  This limits the results.   Super quick. An index would probably speed up the query though.
+
+*********** Query 18 ***********
+Only one filter is used for this query.  Maybe check the statistics for whether filtering lineitem is better than doing the join on customer or orders.
 If the result of either join is smaller than the filtering should change plan.
-Query 22
-Accesses customer table twice. Can make a materialized view if this is necessary. Index on shipdate.
 
-Part 2
+*********** Query 22 ***********
+This query is fast.  Everything has been put into 2 filters, combined with ‘AND’s.  This limits results.  Accesses customer table twice. Can make a materialized view of this is necessary. Index on shipdate.
 
-Part 3
+
+
+********************** Part 2 **********************
+
+*********** Stats ***********
+
+Stats slightly improved the runtime of query 1, and significantly improved the runtime for queries 3 and 5.  Stats slightly improved the runtime of query 6.  Finally stats significantly increased the runtime for query 18 and slightly increased that of query 22. 
+
+As stated above, using statistics improved queries 1, 3, 5, and 6 in varying amounts.  This means that analyzing the tables for these queries did help the optimizer pick better plans.  The runtimes for queries 18 and 22, however were negatively impacted.  Clearly keeping stats about the overall distribution of these tables was not beneficial.  Using the distribution taken from the stats was not a huge factor in the queries and, as a result, did not improve the runtime.
+
+
+*********** Parallelism ***********
+
+Using parallel query plans did not improve the runtime for any of the queries.  For some it did not seem to affect runtime at all, given that the runtimes were almost exactly the same as the normal query times.  
+
+(Since we expected parallelism to improve runtime we rechecked our results and made sure we used: “SQL> alter table lineitem parallel 4;”.  After rechecking our results still held though.)
+
+
+For queries 3 and 22 the runtime actually increased.  This was an unexpected result because accessing records in parallel should in theory execute more quickly than accessing them sequentially.  It is possible though that the overhead associated with setting up the parallelism outweighed any benefit of parallel access.  Perhaps the cost of parallel communication and data transfer added to the runtimes of queries 3 and 22.
+
+
+*********** Indexes ***********
+
+Unexpectedly, indexes negatively impacted the runtime of all of the queries.  Query 1, query 3, and query 6 were the most impacted queries.  The queries use “Index Range Scans” with indexing.  This use contributes to the increased runtime and decreased performance for the queries.                 
+
+
+
+
+
+********************** Part 3 **********************
 
 Materialized views would have been used, but since they weren't available they were omitted.
 Parallelization can only help speed up processing tuples.
 Statistics should only be used on joins with large numbers of relations since join optimization takes time.
-The indexes didn't help very much likeyl due to the nature of the fields in the tables. If the fields
+The indexes didn't help very much likely due to the nature of the fields in the tables. If the fields
 aren't unique the program will have to travel along the index until it finds the right tuple. If the fields are 
 unique, but you need all of them, the index doesn't help very much.
 
@@ -75,20 +113,35 @@ create materialized view customer_orders enable query rewrite as select * from c
 alter table customer parallel 4;
 alter table orders parallel 4;
 
-Results
+
+
+
+*********** Results ***********
+
+*********** Query 1 ***********
 Query 1 optimized did marginally better than the normal query. This is likely due to random underlying speed decay
 due to others on the system.
+
+*********** Query 3 ***********
 Query 3 optimized did better than the normal query. Parallelizing the tables likely sped up the processing time. The
 optimized query used fewer steps than the normal query based on the query plans. This likely sped up the query.
+
+*********** Query 5 ***********
 Query 5 optimized did better than the normal query. Query 5 optimized used fewer steps than the normal query.
 The redo size and number of recursive calls for the normal query were also larger. These factors, in particular,
 the number of recursice calls likely slowed down the normal query.
+
+*********** Query 6 ***********
 Query 6 optimized did worse than the normal query. We had more recursive calls in the optimized query likely
 slowing down the query. However, we did have fewer physical reads so if memory was a constraint, parallelization
 would be desirable.
+
+*********** Query 18 ***********
 Query 18 optimized did worse than the normal query. The optimized query used parallelization. This likely caused
 an increase of 270 in the redo size. It also opened up the system to being slowed down by others doing parallel
 proessing. These factors likely caused the query to slow down. 
+
+*********** Query 22 ***********
 Query 22 did worse than the normal query. The normal query had fewer recursive calls likely speeding up 
 the process. Paralellization did help with the number of physical reads though so if we were short on memory, 
 parallelization would probably be better despite being slightly slower.
